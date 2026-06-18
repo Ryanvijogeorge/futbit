@@ -1,0 +1,688 @@
+# FIFA World Cup 2026 Predictor — instructions.md
+
+Build a small-scale FIFA World Cup 2026 prediction website for a school competition (~50–500 users).
+
+Implement **ONLY the requested step**.
+
+Do not modify database schema unless explicitly asked.
+
+---
+
+# Tech Stack
+
+Backend
+
+* Flask
+* Python 3
+* sqlite3 ONLY
+* datetime
+* zoneinfo
+
+Frontend
+
+* HTML
+* CSS
+* Jinja2 Templates
+* Minimal JavaScript
+
+Do NOT use
+
+* SQLAlchemy
+* React
+* Bootstrap
+* Football APIs
+
+---
+
+# Code Quality Requirements
+
+* Keep code modular and easy to extend.
+* Avoid giant routes/functions (>50 lines when possible).
+* Put reusable logic into helper functions.
+* Do not rename existing database columns.
+* Do not change database schema.
+* Explain where newly generated code belongs.
+* Generate code incrementally.
+* New features should be easy to add later.
+* Extend existing code rather than rewriting entire files.
+
+---
+
+# Project Structure
+
+wcjps/
+
+contxt.txt
+app.py
+
+helpers.py
+
+init_db.py
+
+backup.py
+
+requirements.txt
+
+data/
+
+matches.json
+
+worldcup.db
+
+templates/
+
+login.html
+
+register.html
+
+home.html
+
+leaderboard.html
+
+admin.html
+
+match.html
+
+static/
+
+style.css
+
+script.js
+
+backups/
+
+.venv/
+
+---
+
+# Database
+
+users
+
+id INTEGER PRIMARY KEY AUTOINCREMENT
+
+username TEXT UNIQUE NOT NULL
+
+password_hash TEXT NOT NULL
+
+student_class INTEGER
+
+division TEXT
+
+is_admin INTEGER DEFAULT 0
+
+created_at DATETIME
+
+last_login DATETIME
+
+student_class allowed values
+
+6
+
+7
+
+8
+
+9
+
+10
+
+11
+
+12
+
+division allowed values
+
+A
+
+B
+
+C
+
+D
+
+E
+
+F
+
+matches
+
+id INTEGER PRIMARY KEY
+
+team1 TEXT
+
+team2 TEXT
+
+group_name TEXT
+
+stage TEXT
+
+match_number INTEGER
+
+kickoff DATETIME
+
+score1 INTEGER
+
+score2 INTEGER
+
+status TEXT
+
+processed INTEGER DEFAULT 0
+
+status values
+
+upcoming
+
+finished
+
+processed values
+
+0
+
+points not awarded
+
+1
+
+points already awarded
+
+predictions
+
+id INTEGER PRIMARY KEY AUTOINCREMENT
+
+user_id INTEGER
+
+match_id INTEGER
+
+pred1 INTEGER
+
+pred2 INTEGER
+
+submitted_at DATETIME
+
+distance INTEGER
+
+points_awarded INTEGER
+
+FOREIGN KEY(user_id)
+
+REFERENCES users(id)
+
+FOREIGN KEY(match_id)
+
+REFERENCES matches(id)
+
+UNIQUE(user_id,match_id)
+
+---
+
+# Match Data
+
+matches.json contains ONLY the 72 group-stage matches.
+
+During Step 1,
+
+init_db.py loads matches.json into the matches table inside worldcup.db.
+
+After initialization,
+
+matches.json is never modified.
+
+All knockout matches are generated later by inserting new rows into the existing matches table.
+
+No additional JSON files should ever be created.
+
+Do not use football APIs.
+
+---
+
+# Features
+
+Authentication
+
+Register
+
+Login
+
+Logout
+
+Sessions
+
+Password hashing
+
+Registration page should ask for
+
+Username
+
+Password
+
+Class
+
+Dropdown
+
+6-12
+
+Division
+
+Dropdown
+
+A-F
+
+Store values in users table.
+
+---
+
+# Home Page
+
+Dropdown
+
+Groups A-L
+
+Selecting a group shows
+
+Team1 vs Team2
+
+Kickoff
+
+Prediction count
+
+Before kickoff
+
+Display usernames only
+
+Ryan ✓
+
+Alex ✓
+
+After kickoff
+
+Display predictions
+
+Ryan 2-1
+
+Alex 1-1
+
+---
+
+# Predictions
+
+Two integer inputs
+
+[2]
+
+*
+
+[1]
+
+One prediction per user per match.
+
+Predictions editable until lock.
+
+Prediction lock
+
+5 minutes before kickoff
+
+locked =
+
+now >= kickoff - timedelta(minutes=5)
+
+Disable prediction inputs after lock.
+
+---
+
+# Leaderboard
+
+Do NOT store leaderboard.
+
+Compute dynamically.
+
+scores={}
+
+for prediction:
+
+scores[user]+=points_awarded
+
+Sort descending.
+
+---
+
+# Group Standings
+
+Do NOT store standings.
+
+Compute using Python dictionaries.
+
+Sort by
+
+Points
+
+Goal Difference
+
+Goals Scored
+
+---
+
+# Admin Page
+
+Accessible only if
+
+is_admin=1
+
+Admin enters score
+
+[2]
+
+*
+
+[1]
+
+Save
+
+Save button logic
+
+Update
+
+score1
+
+score2
+
+status="finished"
+
+If processed==0
+
+Fetch predictions
+
+distance =
+
+abs(pred1-score1)
+
+*
+
+abs(pred2-score2)
+
+Sort ascending
+
+Award
+
+1st place
+
+5 points
+
+2nd place
+
+3 points
+
+3rd place
+
+1 point
+
+If multiple users tie for first place
+
+All tied users receive 5 points.
+
+Store
+
+distance
+
+points_awarded
+
+Set
+
+processed=1
+
+Commit
+
+---
+
+# Knockout Generation
+
+Initially
+
+Only 72 group-stage matches exist.
+
+Admin buttons
+
+Generate Round of 32
+
+Generate Round of 16
+
+Generate Quarterfinals
+
+Generate Semifinals
+
+Generate Third Place Match
+
+Generate Final
+
+Compute standings.
+
+Insert generated matches into existing matches table.
+
+Examples
+
+1A vs 2B
+
+1B vs 2A
+
+...
+
+---
+
+# Database Safety
+
+matches.json
+
+Permanent seed data.
+
+worldcup.db
+
+Stores
+
+Users
+
+Predictions
+
+Results
+
+Create backups/ folder.
+
+Implement
+
+backup_database()
+
+Function copies
+
+data/worldcup.db
+
+into
+
+backups/
+
+Timestamp example
+
+backup_2026_06_18_2100.db
+
+Call backup_database()
+
+After admin saves result
+
+After generating knockout rounds
+
+Provide instructions for restoring
+
+worldcup.db
+
+from a backup file.
+
+---
+
+# Deployment
+
+Application should run locally using
+
+python app.py
+
+Generate requirements.txt
+
+Deployment should remain platform independent.
+
+Possible deployment targets
+
+Render
+
+Railway
+
+PythonAnywhere
+
+Fly.io
+
+VPS
+
+School computer
+
+Do not generate provider specific configuration files unless requested.
+
+---
+
+# Git Workflow
+
+After every successfully completed step
+
+git add .
+
+git commit -m "Completed Step X"
+
+git push
+
+Project should always remain in a working state.
+
+Do not proceed to next step until current step works locally.
+
+Prefer multiple small commits.
+
+Example
+
+git commit -m "Step 3A dropdown works"
+
+git commit -m "Step 3B match cards work"
+
+---
+
+# Step Outline
+
+Step 1
+
+Database initialization
+
+Create tables
+
+Load matches.json
+
+Step 2
+
+Registration
+
+Login
+
+Logout
+
+Sessions
+
+Password hashing
+
+Step 3
+
+Home page
+
+Group dropdown
+
+Match cards
+
+Step 4
+
+Prediction submission
+
+Prediction editing
+
+Prediction lock
+
+Step 5
+
+Prediction visibility
+
+Step 6
+
+Leaderboard
+
+Step 7
+
+Admin page
+
+Score entry
+
+Award points
+
+Processed flag
+
+Database backups
+
+Step 8
+
+Group standings
+
+Step 9
+
+Generate Round of 32
+
+Step 10
+
+Generate Round of 16
+
+Quarterfinals
+
+Semifinals
+
+Third Place Match
+
+Final
+
+Step 11
+
+CSS improvements
+
+Step 12
+
+Deployment advice
+
+---
+
+# Important
+
+Do NOT begin implementing immediately.
+
+Wait for me to explicitly say
+
+Step 1
+
+or
+
+Step X
+
+Only generate code for that step.
+
+Do not regenerate previous steps.
+
+Do not modify files unrelated to the current step.
+
+Explain which existing files should be edited and which new files should be created.
+
+At the end of each step provide:
+
+* Files created
+* Files modified
+* Commands to run locally
+* Commands to commit changes to Git
+* Expected result when opening http://127.0.0.1:5000
+
+During each step, at the start and before implementing any feature or functions
+give me the outline what it does what other file it connects to or uses,
+and confirm with me before commiting after each such chekcpoint.
