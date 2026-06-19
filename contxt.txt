@@ -77,11 +77,11 @@ register.html
 
 home.html
 
+group.html
+
 leaderboard.html
 
 admin.html
-
-match.html
 
 static/
 
@@ -199,9 +199,7 @@ pred2 INTEGER
 
 submitted_at DATETIME
 
-distance INTEGER
-
-points_awarded INTEGER
+points_awarded INTEGER DEFAULT 0
 
 FOREIGN KEY(user_id)
 
@@ -239,6 +237,21 @@ Do not use football APIs.
 
 Authentication
 
+The website should be publicly viewable.
+
+Users should NOT be required to log in to browse.
+
+Guests can view
+
+- Groups
+- Matches
+- Kickoff times
+- Prediction counts
+- Leaderboard
+- Predictions (subject to visibility rules)
+
+Authentication is only required when a user wants to submit a prediction.
+
 Register
 
 Login
@@ -269,39 +282,130 @@ A-F
 
 Store values in users table.
 
+After successful registration return users to match they were trying to predict.
+
 ---
 
 # Home Page
 
-Dropdown
+Public page.
 
-Groups A-L
+No login required.
 
-Selecting a group shows
 
-Team1 vs Team2
+Display 12 group cards
 
-Kickoff
+A-L
 
-Prediction count
+
+Each card contains
+
+Group Name
+
+4 team abbreviations
+
+
+Example
+
+
+Group A
+
+
+MEX
+
+USA
+
+KOR
+
+SUI
+
+
+
+Cards should slightly enlarge on hover.
+
+
+Clicking a card redirects to
+
+
+/group/<group_name>
+
+
+
+Home page also displays
+
+Leaderboard preview
+
+Top 10 users
+
+#Group page
+
+Route
+
+
+/group/<group_name>
+
+
+
+Show
+
+
+Back button
+
+
+
+Group name
+
+
+
+Group standings
+
+
+
+Matches
+
+For each match display a match card.
+
+
+Example
+
+
+
+Argentina vs Morocco
+
+
+11 Jun 18:00
+
+
+42 predictions
+
+
+
+[Predict]
+
+
 
 Before kickoff
 
-Display usernames only
 
 Ryan ✓
 
 Alex ✓
 
+
+
+
 After kickoff
 
-Display predictions
 
 Ryan 2-1
 
 Alex 1-1
 
----
+Guests can browse freely.
+
+
+Login required only when Predict is pressed.
+
 
 # Predictions
 
@@ -333,6 +437,7 @@ Disable prediction inputs after lock.
 
 Do NOT store leaderboard.
 
+when leaderboard page opens,
 Compute dynamically.
 
 scores={}
@@ -347,19 +452,7 @@ Sort descending.
 
 # Group Standings
 
-Do NOT store standings.
-
-Compute using Python dictionaries.
-
-Sort by
-
-Points
-
-Goal Difference
-
-Goals Scored
-
----
+store standings, admin manually enters after each match due to small scale
 
 # Admin Page
 
@@ -379,6 +472,7 @@ Save
 
 Save button logic
 
+
 Update
 
 score1
@@ -387,47 +481,102 @@ score2
 
 status="finished"
 
+
 If processed==0
+
 
 Fetch predictions
 
-distance =
 
-abs(pred1-score1)
+For every prediction
 
-*
 
-abs(pred2-score2)
+Determine actual outcome
 
-Sort ascending
 
-Award
+Team1 Win
 
-1st place
+Draw
 
-5 points
+Team2 Win
 
-2nd place
 
-3 points
 
-3rd place
+Determine predicted outcome
 
-1 point
 
-If multiple users tie for first place
+Team1 Win
 
-All tied users receive 5 points.
+Draw
+
+Team2 Win
+
+
+
+actual_gd = score1 - score2
+
+pred_gd = pred1 - pred2
+
+
+
+Award points
+
+
+If
+
+pred1 == score1
+
+AND
+
+pred2 == score2
+
+
+points_awarded = 5
+
+
+
+Else if
+
+predicted outcome == actual outcome
+
+AND
+
+pred_gd == actual_gd
+
+
+points_awarded = 3
+
+
+
+Else if
+
+predicted outcome == actual outcome
+
+
+points_awarded = 1
+
+
+
+Else
+
+
+points_awarded = 0
+
+
 
 Store
 
-distance
 
 points_awarded
 
+
+
 Set
 
+
 processed=1
+
+
 
 Commit
 
@@ -581,29 +730,57 @@ Step 2
 
 Registration
 
+
 Login
+
 
 Logout
 
+
 Sessions
+
 
 Password hashing
 
+
+Redirect guests back to originally selected match after login
+
+
+Public browsing support
+
+
 Step 3
+3A  
+    implement routes
+    files modified is app.py and helpers.py and init_db.py for standings column in worldcup.db table
+    since matches are few, admin will manually update standings so no standings logic required just table
+    in standings table to load standings in group.html
+    dont implement templates .html files now only app.py, helper.py and standing table in init_db.py
 
-Home page
+Public home page
 
-Group dropdown
 
-Match cards
+12 group cards
+
+
+Hover animation
+
+
+/group/<group_name>
+
+
+group.html
+group standings
+
+Leaderboard preview
 
 Step 4
 
 Prediction submission
-
 Prediction editing
-
 Prediction lock
+Require login when Predict button is clicked if not logged in.
+Redirect back to selected match after login
 
 Step 5
 
@@ -624,10 +801,6 @@ Award points
 Processed flag
 
 Database backups
-
-Step 8
-
-Group standings
 
 Step 9
 

@@ -55,11 +55,30 @@ def create_tables(conn):
             pred1 INTEGER,
             pred2 INTEGER,
             submitted_at DATETIME,
-            distance INTEGER,
-            points_awarded INTEGER,
+            points_awarded INTEGER DEFAULT 0,
             FOREIGN KEY(user_id) REFERENCES users(id),
             FOREIGN KEY(match_id) REFERENCES matches(id),
             UNIQUE(user_id, match_id)
+        )
+        """
+    )
+
+    print("creating standings")
+    conn.execute(
+        """
+        CREATE TABLE IF NOT EXISTS standings (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            group_name TEXT,
+            team TEXT,
+            played INTEGER DEFAULT 0,
+            wins INTEGER DEFAULT 0,
+            draws INTEGER DEFAULT 0,
+            losses INTEGER DEFAULT 0,
+            gf INTEGER DEFAULT 0,
+            ga INTEGER DEFAULT 0,
+            gd INTEGER DEFAULT 0,
+            points INTEGER DEFAULT 0,
+            UNIQUE(group_name, team)
         )
         """
     )
