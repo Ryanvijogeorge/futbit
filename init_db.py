@@ -78,6 +78,7 @@ def create_tables(conn):
             ga INTEGER DEFAULT 0,
             gd INTEGER DEFAULT 0,
             points INTEGER DEFAULT 0,
+            position integer,
             UNIQUE(group_name, team)
         )
         """
