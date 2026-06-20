@@ -1,13 +1,307 @@
-<h1>Group {{ group_name }}</h1>
+{% extends "base.html" %}
 
-<h2>Standings</h2>
+
+{% block content %}
+
+
+
+<a
+
+href="{{url_for('home')}}"
+
+class="back"
+
+>
+
+← Back
+
+
+</a>
+
+
+
+<h1>
+
+Group {{group_name}}
+
+</h1>
+
+
+
+
+
+<div class="group-layout">
+
+
+
+
+
+<div class="standings-card">
+
+
+<h2>
+
+Standings
+
+</h2>
+
+
+
+<table>
+
+
+<tr>
+
+<th>Pos</th>
+
+<th>Team</th>
+
+<th>Pts</th>
+
+</tr>
+
+
+
 
 {% for team in standings %}
-<p>{{ team["team"] }} {{ team["points"] }}</p>
+
+
+<tr>
+
+
+<td>
+
+{{team["position"]}}
+
+</td>
+
+
+<td>
+
+{{team["team"]}}
+
+</td>
+
+
+
+<td>
+
+{{team["points"]}}
+
+</td>
+
+
+</tr>
+
+
 {% endfor %}
 
-<h2>Matches</h2>
+
+</table>
+
+
+</div>
+
+
+
+
+
+
+<div class="matches-section">
+
+
 
 {% for match in matches %}
-<p>{{ match["team1"] }} vs {{ match["team2"] }}</p>
+
+
+
+
+<div class="match-card" id="match-{{match['id']}}">
+
+
+
+<div class="team">
+
+{{match["team1"]}}
+
+</div>
+
+
+
+<div class="vs">
+
+VS
+
+</div>
+
+
+
+
+<div class="team">
+
+{{match["team2"]}}
+
+</div>
+
+
+
+
+
+<p>
+
+{{match["kickoff"]}}
+
+</p>
+
+
+
+
+
+{% set prediction = predictions.get(match["id"]) %}
+
+
+{% if prediction_closed(match["id"]) %}
+
+<p class="closed-text">
+
+Predictions Closed
+
+</p>
+
+
+{% else %}
+
+
+
+{% if predict_match == match["id"] %}
+
+
+<form
+
+method="POST"
+
+action="{{ url_for('predict', match_id=match['id']) }}"
+
+class="prediction-form"
+
+>
+
+
+<input
+
+type="hidden"
+
+name="group_name"
+
+value="{{group_name}}"
+
+>
+
+
+<input
+
+type="number"
+
+name="pred1"
+
+min="0"
+
+max="20"
+
+required
+
+
+value="{{ prediction['pred1'] if prediction else '' }}"
+
+
+>
+
+
+-
+
+
+<input
+
+type="number"
+
+name="pred2"
+
+min="0"
+
+max="20"
+
+required
+
+
+value="{{ prediction['pred2'] if prediction else '' }}"
+
+
+>
+
+
+
+<button>
+
+{{
+
+"Update Prediction"
+
+if prediction
+
+else
+
+"Save Prediction"
+
+}}
+
+</button>
+
+
+
+</form>
+
+
+{% else %}
+
+
+
+<a href="{{url_for('group',group_name=group_name)}}?predict={{match['id']}}#match-{{match['id']}}"
+class="predict-button">
+
+>
+
+
+Predict
+
+
+</a>
+
+
+
+{% endif %}
+
+
+
+{% endif %}
+
+
+
+</div>
+
+
+
+
 {% endfor %}
+
+
+
+</div>
+
+
+
+</div>
+
+
+
+
+{% endblock %}

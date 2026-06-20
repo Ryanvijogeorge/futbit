@@ -1,13 +1,73 @@
-<h1>Groups</h1>
+{% extends "base.html" %}
 
-{% for group, teams in groups.items() %}
 
-<p>{{ group }}</p>
+
+{% block content %}
+
+
+<h1 class="page-title">
+
+Predict the World Cup
+
+</h1>
+
+
+
+
+<div class="groups-grid">
+
+
+{% for group,teams in groups.items() %}
+
+
+<a
+
+href="{{ url_for('group',
+group_name=group) }}"
+
+class="group-card"
+
+
+>
+
+
+<h2>
+
+Group {{group}}
+
+</h2>
+
+
+
+<div class="team-list">
+
 
 {% for team in teams %}
-<p>{{ team }}</p>
+
+
+<p>
+
+{{team}}
+
+</p>
+
+
 {% endfor %}
 
-<hr>
+
+
+</div>
+
+
+</a>
+
 
 {% endfor %}
+
+
+</div>
+
+
+
+
+{% endblock %}
