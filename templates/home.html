@@ -1,0 +1,13 @@
+<h1>Groups</h1>
+
+{% for group, teams in groups.items() %}
+
+<p>{{ group }}</p>
+
+{% for team in teams %}
+<p>{{ team }}</p>
+{% endfor %}
+
+<hr>
+
+{% endfor %}

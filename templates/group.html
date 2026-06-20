@@ -1,0 +1,13 @@
+<h1>Group {{ group_name }}</h1>
+
+<h2>Standings</h2>
+
+{% for team in standings %}
+<p>{{ team["team"] }} {{ team["points"] }}</p>
+{% endfor %}
+
+<h2>Matches</h2>
+
+{% for match in matches %}
+<p>{{ match["team1"] }} vs {{ match["team2"] }}</p>
+{% endfor %}
