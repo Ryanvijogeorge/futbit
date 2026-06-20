@@ -22,7 +22,8 @@ from helpers import (
     get_connection,
     get_prediction,
     save_prediction,
-    prediction_closed
+    prediction_closed,
+    get_match_predictions
 )
 
 app = Flask(__name__)
@@ -54,6 +55,19 @@ def group(group_name):
     standings = get_standings(group_name)
 
     predictions = {}
+    prediction_visibility = {}
+
+    for match in matches:
+
+        prediction_visibility[match["id"]] = (
+
+            get_match_predictions(
+
+                match["id"]
+
+            )
+
+        )
 
     if "user_id" in session:
 
@@ -70,15 +84,11 @@ def group(group_name):
     return render_template(
 
         "group.html",
-
         group_name=group_name,
-
         matches=matches,
-
         standings=standings,
-
         predictions=predictions,
-
+        prediction_visibility=prediction_visibility,
         predict_match=request.args.get("predict", type=int)
 
     )

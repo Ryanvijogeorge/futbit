@@ -424,42 +424,54 @@ def save_prediction(
 
 
     conn.close()
+    
+
+def get_match_predictions(match_id):
+
+    conn = get_connection()
+
+    predictions = conn.execute(
+
+        """
+
+        SELECT
+
+        users.username,
+
+        predictions.pred1,
+
+        predictions.pred2,
+
+        predictions.submitted_at
 
 
-if __name__ == "__main__":
-
-    save_prediction(
-
-        2,
-
-        3,
-
-        5,
-
-        7
-
-    )
+        FROM predictions
 
 
-    print(
+        JOIN users
 
-        get_prediction(
 
-            2,
+        ON users.id = predictions.user_id
 
-            3
+
+        WHERE match_id = ?
+
+
+        ORDER BY submitted_at
+
+
+        """,
+
+        (
+
+            match_id,
 
         )
 
-    )
+    ).fetchall()
 
 
-    print(
+    conn.close()
 
-        prediction_closed(
 
-            1
-
-        )
-
-    )
+    return predictions

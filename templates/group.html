@@ -1,307 +1,209 @@
-{% extends "base.html" %}
+{% extends "base.html" %} {% block content %}
 
+<a href="{{url_for('home')}}" class="back"> ← Back </a>
 
-{% block content %}
-
-
-
-<a
-
-href="{{url_for('home')}}"
-
-class="back"
-
->
-
-← Back
-
-
-</a>
-
-
-
-<h1>
-
-Group {{group_name}}
-
-</h1>
-
-
-
-
+<h1>Group {{group_name}}</h1>
 
 <div class="group-layout">
+  <div class="standings-card">
+    <h2>Standings</h2>
 
+    <table>
+      <tr>
+        <th>Pos</th>
 
+        <th>Team</th>
 
+        <th>Pts</th>
+      </tr>
 
+      {% for team in standings %}
 
-<div class="standings-card">
+      <tr>
+        <td>{{team["position"]}}</td>
 
+        <td>{{team["team"]}}</td>
 
-<h2>
+        <td>{{team["points"]}}</td>
+      </tr>
 
-Standings
+      {% endfor %}
+    </table>
+  </div>
 
-</h2>
+  <div class="matches-section">
+    {% for match in matches %}
 
+    <div class="match-card" id="match-{{match['id']}}">
+      <div class="team">{{match["team1"]}}</div>
 
+      <div class="vs">VS</div>
 
-<table>
+      <div class="team">{{match["team2"]}}</div>
 
+      <p>{{match["kickoff"]}}</p>
 
-<tr>
+      {% set prediction = predictions.get(match["id"]) %} {% if
+      prediction_closed(match["id"]) %}
 
-<th>Pos</th>
+      <p class="closed-text">Predictions Closed</p>
 
-<th>Team</th>
+      {% else %} {% if predict_match == match["id"] %}
 
-<th>Pts</th>
+      <form
+        method="POST"
+        action="{{ url_for('predict', match_id=match['id']) }}"
+        class="prediction-form"
+      >
+        <input type="hidden" name="group_name" value="{{group_name}}" />
 
-</tr>
+        <input
+          type="number"
+          name="pred1"
+          min="0"
+          max="20"
+          required
+          value="{{ prediction['pred1'] if prediction else '' }}"
+        />
 
+        -
 
+        <input
+          type="number"
+          name="pred2"
+          min="0"
+          max="20"
+          required
+          value="{{ prediction['pred2'] if prediction else '' }}"
+        />
 
+        <button>
+          {{ "Update Prediction" if prediction else "Save Prediction" }}
+        </button>
+      </form>
 
-{% for team in standings %}
+      {% else %}
 
+      <a
+        href="{{url_for('group',group_name=group_name)}}?predict={{match['id']}}#match-{{match['id']}}"
+        class="predict-button"
+      >
+        > Predict
+      </a>
 
-<tr>
+      {% endif %} {% endif %} {% set preds =
+      prediction_visibility.get(match["id"], []) %} {% if preds %}
 
+      <div class="prediction-preview">
+        {% for p in preds[:5] %}
 
-<td>
+        <div class="prediction-line">
+          <span>{{ p["username"] }}</span>
 
-{{team["position"]}}
+          {% if prediction_closed(match["id"]) %}
 
-</td>
+          <span> {{ p["pred1"] }}-{{ p["pred2"] }} </span>
 
+          {% else %}
 
-<td>
+          <span>✓</span>
 
-{{team["team"]}}
+          {% endif %}
+        </div>
 
-</td>
+        {% endfor %} {% if preds|length > 5 %}
 
+        <button class="show-more" data-modal="{{ match['id'] }}">
+          Show {{ preds|length - 5 }} more
+        </button>
 
+        {% endif %}
+      </div>
+      {% endif %}
+    </div>
 
-<td>
+    {% endfor %}
+  </div>
 
-{{team["points"]}}
+  {% for match in matches %} {% set preds =
+  prediction_visibility.get(match["id"], []) %} {% if preds %}
 
-</td>
+  <div class="modal" id="modal-{{ match['id'] }}">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h2>Predictions</h2>
 
+        <button class="close-modal" data-modal="{{ match['id'] }}">✕</button>
+      </div>
 
-</tr>
+      {% for i in range(5) %} {% for p in preds %}
 
+      <div class="prediction-line">
+        <span> {{ p["username"] }} </span>
 
-{% endfor %}
+        {% if prediction_closed(match["id"]) %}
 
+        <span> {{ p["pred1"] }}-{{ p["pred2"] }} </span>
 
-</table>
+        {% else %}
 
+        <span> ✓ </span>
 
+        {% endif %}
+      </div>
+
+      {% endfor %} {% endfor %}
+    </div>
+  </div>
+
+  {% endif %} {% endfor %}
 </div>
 
-
-
-
-
-
-<div class="matches-section">
-
-
-
-{% for match in matches %}
-
-
-
-
-<div class="match-card" id="match-{{match['id']}}">
-
-
-
-<div class="team">
-
-{{match["team1"]}}
-
-</div>
-
-
-
-<div class="vs">
-
-VS
-
-</div>
-
-
-
-
-<div class="team">
-
-{{match["team2"]}}
-
-</div>
-
-
-
-
-
-<p>
-
-{{match["kickoff"]}}
-
-</p>
-
-
-
-
-
-{% set prediction = predictions.get(match["id"]) %}
-
-
-{% if prediction_closed(match["id"]) %}
-
-<p class="closed-text">
-
-Predictions Closed
-
-</p>
-
-
-{% else %}
-
-
-
-{% if predict_match == match["id"] %}
-
-
-<form
-
-method="POST"
-
-action="{{ url_for('predict', match_id=match['id']) }}"
-
-class="prediction-form"
-
->
-
-
-<input
-
-type="hidden"
-
-name="group_name"
-
-value="{{group_name}}"
-
->
-
-
-<input
-
-type="number"
-
-name="pred1"
-
-min="0"
-
-max="20"
-
-required
-
-
-value="{{ prediction['pred1'] if prediction else '' }}"
-
-
->
-
-
--
-
-
-<input
-
-type="number"
-
-name="pred2"
-
-min="0"
-
-max="20"
-
-required
-
-
-value="{{ prediction['pred2'] if prediction else '' }}"
-
-
->
-
-
-
-<button>
-
-{{
-
-"Update Prediction"
-
-if prediction
-
-else
-
-"Save Prediction"
-
-}}
-
-</button>
-
-
-
-</form>
-
-
-{% else %}
-
-
-
-<a href="{{url_for('group',group_name=group_name)}}?predict={{match['id']}}#match-{{match['id']}}"
-class="predict-button">
-
->
-
-
-Predict
-
-
-</a>
-
-
-
-{% endif %}
-
-
-
-{% endif %}
-
-
-
-</div>
-
-
-
-
-{% endfor %}
-
-
-
-</div>
-
-
-
-</div>
-
-
-
+<script>
+  document.querySelectorAll(".show-more").forEach((btn) => {
+    btn.addEventListener(
+      "click",
+
+      function () {
+        let id = this.dataset.modal;
+
+        document.getElementById("modal-" + id).style.display = "block";
+
+        document.body.style.overflow = "hidden";
+      },
+    );
+  });
+
+  document.querySelectorAll(".close-modal").forEach((btn) => {
+    btn.addEventListener(
+      "click",
+
+      function () {
+        let id = this.dataset.modal;
+
+        document.getElementById("modal-" + id).style.display = "none";
+
+        document.body.style.overflow = "auto";
+      },
+    );
+  });
+
+  window.addEventListener(
+    "click",
+
+    function (e) {
+      document
+        .querySelectorAll(".modal")
+
+        .forEach((modal) => {
+          if (e.target === modal) {
+            modal.style.display = "none";
+
+            document.body.style.overflow = "auto";
+          }
+        });
+    },
+  );
+</script>
 
 {% endblock %}
