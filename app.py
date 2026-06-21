@@ -1,5 +1,5 @@
 import sqlite3
-
+import secrets
 from flask import (
     Flask,
     render_template,
@@ -7,13 +7,10 @@ from flask import (
     redirect,
     url_for,
     session,
-    flash
+    flash,
 )
 
-from werkzeug.security import (
-    generate_password_hash,
-    check_password_hash
-)
+from werkzeug.security import generate_password_hash, check_password_hash
 
 from helpers import (
     get_groups,
@@ -23,17 +20,20 @@ from helpers import (
     get_prediction,
     save_prediction,
     prediction_closed,
-    get_match_predictions
+    get_match_predictions,
+    get_all_matches,
+    process_match,
 )
 
 app = Flask(__name__)
-app.jinja_env.globals.update(
+app.jinja_env.globals.update(prediction_closed=prediction_closed)
 
-prediction_closed=prediction_closed
+app.secret_key = secrets.token_hex(16)
 
-)
 
-app.secret_key = "change_this_later"
+def admin_required():
+
+    return session.get("user_id") == 1
 
 
 @app.route("/")
@@ -41,10 +41,7 @@ def home():
 
     groups = get_groups()
 
-    return render_template(
-        "home.html",
-        groups=groups
-    )
+    return render_template("home.html", groups=groups)
 
 
 @app.route("/group/<group_name>")
@@ -59,38 +56,37 @@ def group(group_name):
 
     for match in matches:
 
-        prediction_visibility[match["id"]] = (
+        preds = get_match_predictions(match["id"])
 
-            get_match_predictions(
+        print(len(preds))
 
-                match["id"]
+        if preds:
 
-            )
+            print(preds[0].keys())
 
-        )
+        if prediction_closed(match["id"]):
+
+            preds.sort(key=lambda p: (-p["points_awarded"], p["submitted_at"]))
+
+        else:
+
+            preds.sort(key=lambda p: p["submitted_at"])
+        prediction_visibility[match["id"]] = preds
 
     if "user_id" in session:
-
         for match in matches:
-
-            pred = get_prediction(
-                session["user_id"],
-                match["id"]
-            )
+            pred = get_prediction(session["user_id"], match["id"])
 
             predictions[match["id"]] = pred
 
-
     return render_template(
-
         "group.html",
         group_name=group_name,
         matches=matches,
         standings=standings,
         predictions=predictions,
         prediction_visibility=prediction_visibility,
-        predict_match=request.args.get("predict", type=int)
-
+        predict_match=request.args.get("predict", type=int),
     )
 
 
@@ -98,121 +94,43 @@ def group(group_name):
 def predict(match_id):
 
     if "user_id" not in session:
-
         group_name = request.form["group_name"]
         session["next_url"] = (
-        url_for("group", group_name=group_name)
-        + f"?predict={match_id}#match-{match_id}"
+            url_for("group", group_name=group_name)
+            + f"?predict={match_id}#match-{match_id}"
         )
 
-        return redirect(
-
-            url_for(
-
-                "login"
-
-            )
-
-        )
-
+        return redirect(url_for("login"))
 
     if prediction_closed(match_id):
+        flash("Predictions closed.")
 
-        flash(
+        return redirect(request.referrer)
 
-            "Predictions closed."
+    pred1 = int(request.form["pred1"])
 
-        )
+    pred2 = int(request.form["pred2"])
 
-        return redirect(
+    save_prediction(session["user_id"], match_id, pred1, pred2)
 
-            request.referrer
-
-        )
-
-
-    pred1 = int(
-
-        request.form["pred1"]
-
-    )
-
-    pred2 = int(
-
-        request.form["pred2"]
-
-    )
-
-    save_prediction(
-
-        session["user_id"],
-
-        match_id,
-
-        pred1,
-
-        pred2
-
-    )
-
-
-    flash(
-
-        "Prediction saved."
-
-    )
+    flash("Prediction saved.")
 
     group_name = request.form["group_name"]
 
-    return redirect(
-
-    url_for(
-
-        "group",
-
-        group_name=group_name
-
-    )
-
-    +
-
-    f"#match-{match_id}"
-    )
+    return redirect(url_for("group", group_name=group_name) + f"#match-{match_id}")
 
 
-
-@app.route(
-
-    "/login",
-
-    methods=[
-
-        "GET",
-
-        "POST"
-
-    ]
-
-)
-
+@app.route("/login", methods=["GET", "POST"])
 def login():
 
-
     if request.method == "POST":
-
-
         username = request.form["username"]
-
 
         password = request.form["password"]
 
-
-
         conn = get_connection()
 
-
         user = conn.execute(
-
             """
 
             SELECT *
@@ -222,136 +140,41 @@ def login():
             WHERE username = ?
 
             """,
-
-            (
-
-                username,
-
-            )
-
+            (username,),
         ).fetchone()
-
-
 
         conn.close()
 
-
-
-        if (
-
-            user
-
-            and
-
-            check_password_hash(
-
-                user["password_hash"],
-
-                password
-
-            )
-
-        ):
-
-
-
+        if user and check_password_hash(user["password_hash"], password):
             session["user_id"] = user["id"]
 
             session["username"] = user["username"]
 
+            return redirect(session.pop("next_url", url_for("home")))
+
+        flash("Invalid username or password")
+
+    return render_template("login.html")
 
 
-            return redirect(
-
-                session.pop(
-
-                    "next_url",
-
-                    url_for(
-
-                        "home"
-
-                    )
-
-                )
-
-            )
-
-
-
-        flash(
-
-            "Invalid username or password"
-
-        )
-
-
-
-    return render_template(
-
-        "login.html"
-
-    )
-
-
-
-@app.route(
-
-    "/register",
-
-    methods=[
-
-        "GET",
-
-        "POST"
-
-    ]
-
-)
-
+@app.route("/register", methods=["GET", "POST"])
 def register():
 
-
     if request.method == "POST":
-
-
-
         username = request.form["username"]
-
 
         password = request.form["password"]
 
-
-        student_class = int(
-
-            request.form["student_class"]
-
-        )
-
+        student_class = int(request.form["student_class"])
 
         division = request.form["division"]
 
-
-
-
-        password_hash = generate_password_hash(
-
-            password
-
-        )
-
-
+        password_hash = generate_password_hash(password)
 
         conn = get_connection()
 
-
-
         try:
-
-
-
             conn.execute(
-
                 """
 
                 INSERT INTO users
@@ -397,38 +220,12 @@ def register():
 
 
                 """,
-
-
-
-                (
-
-
-                    username,
-
-
-                    password_hash,
-
-
-                    student_class,
-
-
-                    division
-
-
-                )
-
-
-
+                (username, password_hash, student_class, division),
             )
-
-
 
             conn.commit()
 
-
-
             user = conn.execute(
-
                 """
 
                 SELECT id
@@ -439,71 +236,34 @@ def register():
                 WHERE username = ?
 
                 """,
-
-
-
-                (
-
-                    username,
-
-                )
-
-
+                (username,),
             ).fetchone()
-
-
 
             session["user_id"] = user["id"]
 
             session["username"] = username
 
-
-
             conn.close()
 
-
-
-            return redirect(
-
-                session.pop(
-
-                    "next_url",
-
-                    url_for(
-
-                        "home"
-
-                    )
-
-                )
-
-            )
-
-
+            return redirect(session.pop("next_url", url_for("home")))
 
         except sqlite3.IntegrityError:
-
-
-
-            flash(
-
-                "Username already exists."
-
-            )
-
-
+            flash("Username already exists.")
 
             conn.close()
 
+    return render_template("register.html")
 
 
+@app.route("/admin")
+def admin():
 
-    return render_template(
+    if not admin_required():
+        return redirect(url_for("home"))
 
-        "register.html"
+    matches = get_all_matches()
 
-    )
-
+    return render_template("admin.html", matches=matches)
 
 
 @app.route("/logout")
@@ -511,21 +271,49 @@ def logout():
 
     session.clear()
 
-    return redirect(
+    return redirect(url_for("home"))
 
-        url_for(
 
-            "home"
+@app.route("/process_match", methods=["POST"])
+def process_match_route():
 
-        )
+    if not admin_required():
 
-    )
+        return redirect(url_for("home"))
 
+    match_id = int(request.form["match_id"])
+
+    score1 = int(request.form["score1"])
+
+    score2 = int(request.form["score2"])
+
+    process_match(match_id, score1, score2)
+
+    return redirect(url_for("admin"))
 
 
 if __name__ == "__main__":
-    app.run(
+    from datetime import datetime, timedelta
+    conn = get_connection()
 
-        debug=True
+    kickoff = (datetime.now() - timedelta(hours=2)).isoformat()
 
+    conn.execute(
+        """
+
+        UPDATE matches
+
+
+        SET kickoff = ?
+
+
+        WHERE id = ?
+
+        """,
+        (kickoff, 43),
     )
+
+    conn.commit()
+
+    conn.close()
+    app.run(debug=True)

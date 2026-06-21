@@ -89,6 +89,12 @@ main {
   gap: 40px;
 }
 
+@media (max-width: 900px) {
+  .group-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
 .standings-card {
   background: #15223f;
 
@@ -395,7 +401,6 @@ button {
   color: white;
 
   cursor: pointer;
-
 }
 
 .modal-header {
@@ -434,24 +439,61 @@ button {
   color: #f3c74d;
 }
 
-.nav-link{
+.nav-link {
+  text-decoration: none;
 
-text-decoration:none;
+  color: white;
 
-color:white;
+  transition: all 0.2s ease;
 
-transition: all 0.2s ease;
+  display: inline-block;
 
-display:inline-block;
-
-margin-right: 10px;
-
+  margin-right: 10px;
 }
-.nav-link:hover{
+.nav-link:hover {
+  color: #f3c74d;
 
-color:#f3c74d;
+  text-shadow: 0 0 8px rgba(243, 199, 77, 0.5);
 
-text-shadow:0 0 8px rgba(243,199,77,0.5);
+  transform: scale(1.05);
+}
 
-transform:scale(1.05);
+.admin-container {
+  max-width: 900px;
+
+  margin: auto;
+
+  padding: 20px;
+}
+
+.admin-card {
+  padding: 20px;
+
+  margin-bottom: 15px;
+
+  background: #15223f;
+
+  border-radius: 15px;
+}
+
+.admin-card form {
+  margin-top: 10px;
+
+  display: flex;
+
+  gap: 10px;
+
+  align-items: center;
+}
+
+.admin-card input {
+  width: 60px;
+
+  padding: 6px;
+}
+
+.admin-card button {
+  padding: 8px 14px;
+
+  cursor: pointer;
 }

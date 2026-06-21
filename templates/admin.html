@@ -1,0 +1,53 @@
+{% extends "base.html" %} {% block content %}
+
+<div class="admin-container">
+  <h1>Admin Panel</h1>
+
+  {% for match in matches %}
+
+  <div class="admin-card">
+    <div>
+      <strong> {{ match["team1"] }} </strong>
+
+      vs
+
+      <strong> {{ match["team2"] }} </strong>
+    </div>
+
+    <div>{{ match["kickoff"] }}</div>
+
+    <form method="POST" action="{{ url_for('process_match_route') }}">
+      <input type="hidden" name="match_id" value="{{ match['id'] }}" />
+
+      <input
+        type="number"
+        name="score1"
+        min="0"
+        required
+        value="{{ match['score1'] if match['score1'] is not none else '' }}"
+      />
+
+      -
+
+      <input
+        type="number"
+        name="score2"
+        min="0"
+        required
+        value="{{ match['score2'] if match['score2'] is not none else '' }}"
+      />
+
+      <button>Save</button>
+
+      {% if match["processed"] %}
+
+      <span> ✓ Processed </span>
+
+      {% endif %}
+    </form>
+  </div>
+
+  {% endfor %}
+</div>
+
+{% endblock %}

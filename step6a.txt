@@ -1,0 +1,42 @@
+Step 6A Checklist
+☐ Admin page
+/admin
+Shows all matches
+Only unprocessed matches initially (or all matches with processed ones greyed out)
+☐ Admin route protection
+session.get("user_id") == 1
+Otherwise abort(403) or redirect home
+☐ calculate_points helper
+Exact score → 10
+Correct outcome + exact GD → 5
+Correct outcome only → 3
+Else → 0
+☐ award_points helper
+Takes match_id
+Reads actual score from matches
+Loops through predictions
+Calculates points
+Updates predictions.points_awarded
+☐ process_match helper
+Sets score1
+Sets score2
+status = "Completed"
+processed = 1
+Calls award_points(match_id)
+☐ process_match route
+POST only
+Admin only
+Reads match_id, score1, score2
+Calls helper
+Redirects back to /admin
+☐ Modal/preview display
+Before kickoff:
+no "Predictions Closed"
+preview/modal if predictions exist
+After kickoff:
+no predictions → just "Predictions Closed"
+predictions exist → "Predictions Closed" + preview/modal
+After processed:
+preview/modal sorted by points_awarded DESC
+show +10, +5, +3, +0
+☐ Commit

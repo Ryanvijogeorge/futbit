@@ -2,7 +2,6 @@ import json
 import sqlite3
 from pathlib import Path
 
-
 BASE_DIR = Path(__file__).resolve().parent
 DATA_DIR = BASE_DIR / "data"
 DB_PATH = DATA_DIR / "worldcup.db"
@@ -15,8 +14,7 @@ def get_connection():
 
 
 def create_tables(conn):
-    conn.execute(
-        """
+    conn.execute("""
         CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             username TEXT UNIQUE NOT NULL,
@@ -27,10 +25,8 @@ def create_tables(conn):
             created_at DATETIME,
             last_login DATETIME
         )
-        """
-    )
-    conn.execute(
-        """
+        """)
+    conn.execute("""
         CREATE TABLE IF NOT EXISTS matches (
             id INTEGER PRIMARY KEY,
             team1 TEXT,
@@ -44,10 +40,8 @@ def create_tables(conn):
             status TEXT,
             processed INTEGER DEFAULT 0
         )
-        """
-    )
-    conn.execute(
-        """
+        """)
+    conn.execute("""
         CREATE TABLE IF NOT EXISTS predictions (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             user_id INTEGER,
@@ -60,12 +54,10 @@ def create_tables(conn):
             FOREIGN KEY(match_id) REFERENCES matches(id),
             UNIQUE(user_id, match_id)
         )
-        """
-    )
+        """)
 
     print("creating standings")
-    conn.execute(
-        """
+    conn.execute("""
         CREATE TABLE IF NOT EXISTS standings (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             group_name TEXT,
@@ -81,8 +73,7 @@ def create_tables(conn):
             position integer,
             UNIQUE(group_name, team)
         )
-        """
-    )
+        """)
 
 
 def load_matches():
@@ -119,13 +110,73 @@ def insert_matches(conn, matches):
     )
 
 
+def initialize_standings(conn):
+
+    teams = conn.execute("""
+        SELECT DISTINCT
+            group_name,
+            team
+        FROM
+        (
+            SELECT
+                group_name,
+                team1 AS team
+            FROM matches
+
+            UNION
+
+            SELECT
+                group_name,
+                team2 AS team
+            FROM matches
+        )
+
+        ORDER BY
+            group_name,
+            team
+        """).fetchall()
+
+    for group_name, team in teams:
+
+        conn.execute(
+            """
+            INSERT OR IGNORE INTO standings
+            (
+                group_name,
+                team
+            )
+
+            VALUES
+            (
+                ?,
+                ?
+            )
+            """,
+            (group_name, team),
+        )
+
+
 def initialize_database():
     with get_connection() as conn:
         create_tables(conn)
         insert_matches(conn, load_matches())
+        initialize_standings(conn)
         conn.commit()
 
 
 if __name__ == "__main__":
     initialize_database()
+    conn = get_connection()
+
+    conn.execute("""
+
+        ALTER TABLE users
+
+        ADD COLUMN points INTEGER DEFAULT 0
+
+        """)
+
+    conn.commit()
+
+    conn.close()
     print(f"Database initialized at {DB_PATH}")

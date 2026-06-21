@@ -2,7 +2,6 @@ import sqlite3
 from pathlib import Path
 from datetime import datetime, timedelta
 
-
 BASE_DIR = Path(__file__).resolve().parent
 DB_PATH = BASE_DIR / "data" / "worldcup.db"
 
@@ -17,14 +16,12 @@ def get_connection():
 def get_groups():
     conn = get_connection()
 
-    groups = conn.execute(
-        """
+    groups = conn.execute("""
         SELECT DISTINCT group_name
         FROM matches
         WHERE stage='Group Stage'
         ORDER BY group_name
-        """
-    ).fetchall()
+        """).fetchall()
 
     result = {}
 
@@ -49,7 +46,7 @@ def get_groups():
 
             ORDER BY team
             """,
-            (group["group_name"], group["group_name"])
+            (group["group_name"], group["group_name"]),
         ).fetchall()
 
         result[group["group_name"]] = [t["team"] for t in teams]
@@ -70,7 +67,7 @@ def get_matches_by_group(group_name):
         WHERE group_name=?
         ORDER BY kickoff
         """,
-        (group_name,)
+        (group_name,),
     ).fetchall()
 
     conn.close()
@@ -90,7 +87,7 @@ def get_standings(group_name):
         ORDER BY
             position ASC
         """,
-        (group_name,)
+        (group_name,),
     ).fetchall()
 
     conn.close()
@@ -103,7 +100,6 @@ def get_match(match_id):
     conn = get_connection()
 
     match = conn.execute(
-
         """
         SELECT *
 
@@ -112,9 +108,7 @@ def get_match(match_id):
         WHERE id = ?
 
         """,
-
-        (match_id,)
-
+        (match_id,),
     ).fetchone()
 
     conn.close()
@@ -126,9 +120,7 @@ def get_prediction(user_id, match_id):
 
     conn = get_connection()
 
-
     prediction = conn.execute(
-
         """
 
         SELECT *
@@ -149,86 +141,36 @@ def get_prediction(user_id, match_id):
 
 
         """,
-
-
-        (
-
-            user_id,
-
-            match_id
-
-        )
-
-
+        (user_id, match_id),
     ).fetchone()
 
-
-
     conn.close()
-
-
 
     return prediction
 
 
 def prediction_closed(match_id):
 
+    match = get_match(match_id)
 
-    match = get_match(
+    kickoff = datetime.fromisoformat(match["kickoff"])
 
-        match_id
+    lock_time = kickoff - timedelta(minutes=20)
 
-    )
+    now = datetime.now(kickoff.tzinfo)
 
-
-
-    kickoff = datetime.fromisoformat(
-
-        match["kickoff"]
-
-    )
-
-
-
-    lock_time = kickoff - timedelta(
-
-        minutes=20
-
-    )
-
-
-
-    now = datetime.now(
-
-        kickoff.tzinfo
-
-    )
-
-
+    print(kickoff)
+    print(lock_time)
+    print(now)
 
     return now >= lock_time
 
 
-def save_prediction(
-
-        user_id,
-
-        match_id,
-
-        pred1,
-
-        pred2
-
-):
-
-
+def save_prediction(user_id, match_id, pred1, pred2):
 
     conn = get_connection()
 
-
-
     existing = conn.execute(
-
         """
 
         SELECT id
@@ -250,33 +192,14 @@ def save_prediction(
 
 
         """,
-
-
-
-        (
-
-            user_id,
-
-            match_id
-
-        )
-
-
+        (user_id, match_id),
     ).fetchone()
-
-
 
     submitted_at = datetime.now().isoformat()
 
-
-
-
     if existing:
 
-
-
         conn.execute(
-
             """
 
             UPDATE predictions
@@ -309,35 +232,12 @@ def save_prediction(
 
 
             """,
-
-
-
-            (
-
-                pred1,
-
-                pred2,
-
-                submitted_at,
-
-                user_id,
-
-                match_id
-
-            )
-
-
-
+            (pred1, pred2, submitted_at, user_id, match_id),
         )
-
-
 
     else:
 
-
-
         conn.execute(
-
             """
 
             INSERT INTO predictions
@@ -391,47 +291,19 @@ def save_prediction(
 
 
             """,
-
-
-
-            (
-
-
-                user_id,
-
-
-                match_id,
-
-
-                pred1,
-
-
-                pred2,
-
-
-                submitted_at
-
-
-            )
-
-
-
+            (user_id, match_id, pred1, pred2, submitted_at),
         )
-
-
 
     conn.commit()
 
-
     conn.close()
-    
+
 
 def get_match_predictions(match_id):
 
     conn = get_connection()
 
     predictions = conn.execute(
-
         """
 
         SELECT
@@ -441,6 +313,8 @@ def get_match_predictions(match_id):
         predictions.pred1,
 
         predictions.pred2,
+
+        predictions.points_awarded,
 
         predictions.submitted_at
 
@@ -456,22 +330,173 @@ def get_match_predictions(match_id):
 
         WHERE match_id = ?
 
-
-        ORDER BY submitted_at
-
-
         """,
-
-        (
-
-            match_id,
-
-        )
-
+        (match_id,),
     ).fetchall()
 
+    conn.close()
+
+    return predictions
+
+
+def get_all_matches():
+
+    conn = get_connection()
+
+    matches = conn.execute("""
+
+        SELECT *
+
+        FROM matches
+
+
+        ORDER BY kickoff
+
+        """).fetchall()
+
+    conn.close()
+
+    return matches
+
+
+def calculate_points(pred1, pred2, score1, score2):
+
+    if pred1 == score1 and pred2 == score2:
+
+        return 10
+
+    # bools as ints for outcome
+    pred_outcome = (pred1 > pred2) - (pred1 < pred2)
+
+    actual_outcome = (score1 > score2) - (score1 < score2)
+
+    if pred_outcome == actual_outcome:
+
+        pred_gd = pred1 - pred2
+
+        actual_gd = score1 - score2
+
+        if pred_gd == actual_gd:
+
+            return 5
+
+        return 3
+
+    return 0
+
+
+def recompute_match_points(match_id):
+
+    conn = get_connection()
+
+    match = conn.execute(
+        """
+
+        SELECT score1,
+
+               score2
+
+
+        FROM matches
+
+
+        WHERE id=?
+
+        """,
+        (match_id,),
+    ).fetchone()
+
+    predictions = conn.execute(
+        """
+
+        SELECT *
+
+
+        FROM predictions
+
+
+        WHERE match_id=?
+
+        """,
+        (match_id,),
+    ).fetchall()
+
+    for prediction in predictions:
+
+        old_points = prediction["points_awarded"]
+
+        new_points = calculate_points(
+            prediction["pred1"], prediction["pred2"], match["score1"], match["score2"]
+        )
+
+        delta = new_points - old_points
+
+        conn.execute(
+            """
+
+            UPDATE users
+
+
+            SET points = points + ?
+
+
+            WHERE id = ?
+
+            """,
+            (delta, prediction["user_id"]),
+        )
+
+        conn.execute(
+            """
+
+            UPDATE predictions
+
+
+            SET points_awarded=?
+
+
+            WHERE id=?
+
+            """,
+            (new_points, prediction["id"]),
+        )
+
+    conn.commit()
 
     conn.close()
 
 
-    return predictions
+def process_match(match_id, score1, score2):
+
+    conn = get_connection()
+
+    conn.execute(
+        """
+
+        UPDATE matches
+
+
+        SET
+
+
+        score1=?,
+
+        score2=?,
+
+        status='Completed',
+
+        processed=1
+
+
+        WHERE id=?
+
+
+        """,
+        (score1, score2, match_id),
+    )
+
+    conn.commit()
+
+    conn.close()
+
+    recompute_match_points(match_id)

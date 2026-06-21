@@ -43,6 +43,12 @@
 
       <p>{{match["kickoff"]}}</p>
 
+      {% if match["processed"] %}
+
+      <div class="match-score">{{match["score1"]}} - {{match["score2"]}}</div>
+
+      {% endif %}
+      
       {% set prediction = predictions.get(match["id"]) %} {% if
       prediction_closed(match["id"]) %}
 
@@ -102,11 +108,14 @@
 
           {% if prediction_closed(match["id"]) %}
 
-          <span> {{ p["pred1"] }}-{{ p["pred2"] }} </span>
+          <span>
+            {{ p["pred1"] }}-{{ p["pred2"] }} {% if match["processed"] %} (+{{
+            p["points_awarded"] }}) {% endif %}
+          </span>
 
           {% else %}
 
-          <span>✓</span>
+          <span> ✓ </span>
 
           {% endif %}
         </div>
@@ -143,7 +152,10 @@
 
         {% if prediction_closed(match["id"]) %}
 
-        <span> {{ p["pred1"] }}-{{ p["pred2"] }} </span>
+        <span>
+          {{ p["pred1"] }}-{{ p["pred2"] }} {% if match["processed"] %} (+{{
+          p["points_awarded"] }}) {% endif %}
+        </span>
 
         {% else %}
 
