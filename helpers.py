@@ -159,10 +159,6 @@ def prediction_closed(match_id):
 
     now = datetime.now(kickoff.tzinfo)
 
-    print(kickoff)
-    print(lock_time)
-    print(now)
-
     return now >= lock_time
 
 
@@ -500,3 +496,66 @@ def process_match(match_id, score1, score2):
     conn.close()
 
     recompute_match_points(match_id)
+
+
+def update_standing(group_name, team, position, points):
+
+    conn = get_connection()
+
+    conn.execute(
+        """
+
+        UPDATE standings
+
+
+        SET
+
+
+            position = ?,
+
+
+            points = ?
+
+
+        WHERE
+
+
+            group_name = ?
+
+
+            AND team = ?
+
+        """,
+        (position, points, group_name, team),
+    )
+
+    conn.commit()
+
+    conn.close()
+
+
+def get_leaderboard():
+
+    conn = get_connection()
+
+    leaderboard = conn.execute("""
+
+        SELECT
+
+            username,
+
+            points
+
+        FROM users
+
+        ORDER BY
+
+            points DESC,
+
+            username ASC
+
+        """).fetchall()
+
+    conn.close()
+
+    return leaderboard

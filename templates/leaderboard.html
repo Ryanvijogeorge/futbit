@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="leaderboard-container">
+
+<h1>
+
+🏆 Global Leaderboard
+
+</h1>
+
+
+{% for user in leaderboard %}
+
+<div class="leaderboard-row">
+
+<div class="rank">
+
+#{{loop.index}}
+
+</div>
+
+
+<div class="leaderboard-user">
+
+{{user["username"]}}
+
+</div>
+
+
+<div class="leaderboard-points">
+
+{{user["points"]}}
+
+pts
+
+</div>
+
+</div>
+
+{% endfor %}
+
+
+</div>
+
+{% endblock %}

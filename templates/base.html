@@ -1,101 +1,127 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
+  <head>
+    <meta charset="UTF-8" />
 
-<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-<meta charset="UTF-8">
+    <title>FIFA</title>
 
-<meta name="viewport"
-content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
 
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 
-<title>FIFA Predictor</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
 
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static',
+filename='style.css') }}"
+    />
+  </head>
 
-<link rel="preconnect"
-href="https://fonts.googleapis.com">
+  <body>
+    <audio id="bgmusic"></audio>
 
-<link rel="preconnect"
-href="https://fonts.gstatic.com"
-crossorigin>
+    <button id="music-btn" style="display: none">▶ Enable Music</button>
 
+    <button id="mute-btn">🔊</button>
 
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap"
-rel="stylesheet">
+    <nav class="nav-bar">
+      <a class="nav-link" , href="{{ url_for('home') }}"> FUTBIT </a>
 
+      <a class="nav-link" href="{{ url_for('leaderboard') }}"> LEADERBOARD </a>
 
+      {% if session.get("user_id") %}
 
-<link rel="stylesheet"
-href="{{ url_for('static',
-filename='style.css') }}">
+      <a class="nav-link" , href="{{url_for('logout')}}"> Logout </a>
 
+      {% endif %}
+    </nav>
 
-</head>
+    {% with messages = get_flashed_messages() %} {% if messages %} {% for
+    message in messages %}
 
+    <div class="flash-message">{{message}}</div>
 
+    {% endfor %} {% endif %} {% endwith %}
 
-<body>
+    <main>{% block content %} {% endblock %}</main>
 
+    <script>
+      console.log("played");
 
+      const muteBtn = document.getElementById("mute-btn");
+      const musicBtn = document.getElementById("music-btn");
+      const audio = document.getElementById("bgmusic");
 
-<nav>
+      const songs = [
+        "/static/music/love_me_again.mp3",
+        "/static/music/worldcup.m4a",
+      ];
 
-<a class = "nav-link", href="{{ url_for('home') }}">
+      let idx = parseInt(localStorage.getItem("songIdx") || 0);
 
-WCJPS
+      audio.src = songs[idx];
 
-</a>
+      audio.addEventListener("loadedmetadata", () => {
+        audio.currentTime = parseFloat(localStorage.getItem("songTime") || 0);
+      });
 
-{% if session.get("user_id") %}
+      audio.volume = 0.25;
 
-<a class = "nav-link", href="{{url_for('logout')}}">
+      audio.addEventListener("ended", () => {
+        idx = (idx + 1) % songs.length;
 
-Logout
+        localStorage.setItem(
+          "songIdx",
 
-</a>
+          idx,
+        );
 
-{% endif %}
+        localStorage.setItem(
+          "songTime",
 
-</nav>
+          0,
+        );
 
-{% with messages = get_flashed_messages() %}
+        audio.src = songs[idx];
 
-{% if messages %}
+        audio.play();
+      });
 
+      audio.play().catch(() => {
+        musicBtn.style.display = "block";
+      });
 
-{% for message in messages %}
+      musicBtn.onclick = () => {
+        audio.play();
 
+        musicBtn.style.display = "none";
+      };
 
-<div class="flash-message">
+      muteBtn.onclick = () => {
+        audio.muted = !audio.muted;
 
+        muteBtn.textContent = audio.muted ? "🔇" : "🔊";
+      };
 
-{{message}}
+      window.addEventListener("beforeunload", () => {
+        localStorage.setItem(
+          "songIdx",
 
+          idx,
+        );
 
-</div>
+        localStorage.setItem(
+          "songTime",
 
-
-{% endfor %}
-
-
-{% endif %}
-
-
-{% endwith %}
-
-
-
-<main>
-
-{% block content %}
-
-{% endblock %}
-
-</main>
-
-
-
-</body>
-
-
+          audio.currentTime,
+        );
+      });
+    </script>
+  </body>
 </html>

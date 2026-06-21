@@ -48,6 +48,45 @@
   </div>
 
   {% endfor %}
+
+  <hr />
+
+  <h2>Edit Standings</h2>
+
+  {% for s in standings %}
+
+  <form method="POST" action="{{ url_for('update_standing_route') }}">
+    <input type="hidden" name="group_name" value="{{ s['group_name'] }}" />
+
+    <input type="hidden" name="team" value="{{ s['team'] }}" />
+
+    <span> {{ s["group_name"] }} - {{ s["team"] }} </span>
+
+    Pos
+
+    <input
+      type="number"
+      name="position"
+      min="1"
+      max="4"
+      value="{{ s['position'] }}"
+      required
+    />
+
+    Pts
+    
+    <input
+      type="number"
+      name="points"
+      min="0"
+      value="{{ s['points'] }}"
+      required
+    />
+
+    <button>Save</button>
+  </form>
+
+  {% endfor %}
 </div>
 
 {% endblock %}

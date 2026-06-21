@@ -23,6 +23,8 @@ from helpers import (
     get_match_predictions,
     get_all_matches,
     process_match,
+    update_standing,
+    get_leaderboard,
 )
 
 app = Flask(__name__)
@@ -57,12 +59,6 @@ def group(group_name):
     for match in matches:
 
         preds = get_match_predictions(match["id"])
-
-        print(len(preds))
-
-        if preds:
-
-            print(preds[0].keys())
 
         if prediction_closed(match["id"]):
 
@@ -261,9 +257,25 @@ def admin():
     if not admin_required():
         return redirect(url_for("home"))
 
+    conn = get_connection()
+
     matches = get_all_matches()
 
-    return render_template("admin.html", matches=matches)
+    standings = conn.execute("""
+
+        SELECT *
+
+        FROM standings
+
+        ORDER BY
+
+            group_name,
+
+            position
+
+        """).fetchall()
+
+    return render_template("admin.html", matches=matches, standings=standings)
 
 
 @app.route("/logout")
@@ -292,28 +304,28 @@ def process_match_route():
     return redirect(url_for("admin"))
 
 
-if __name__ == "__main__":
-    from datetime import datetime, timedelta
-    conn = get_connection()
+@app.post("/update-standing")
+def update_standing_route():
 
-    kickoff = (datetime.now() - timedelta(hours=2)).isoformat()
+    admin_required()
 
-    conn.execute(
-        """
-
-        UPDATE matches
-
-
-        SET kickoff = ?
-
-
-        WHERE id = ?
-
-        """,
-        (kickoff, 43),
+    update_standing(
+        request.form["group_name"],
+        request.form["team"],
+        int(request.form["position"]),
+        int(request.form["points"]),
     )
 
-    conn.commit()
+    return redirect(url_for("admin"))
 
-    conn.close()
+
+@app.route("/leaderboard")
+def leaderboard():
+
+    leaderboard = get_leaderboard()
+
+    return render_template("leaderboard.html", leaderboard=leaderboard)
+
+
+if __name__ == "__main__":
     app.run(debug=True)

@@ -10,6 +10,8 @@ body {
 
   margin: 0;
 
+  padding: 0;
+
   color: white;
 }
 
@@ -39,7 +41,7 @@ main {
 
 .page-title {
   text-align: center;
-
+  font-size: medium;
   margin-bottom: 40px;
 }
 
@@ -439,6 +441,15 @@ button {
   color: #f3c74d;
 }
 
+.nav-bar {
+  display: flex;
+
+  justify-content: center;
+
+  align-items: center;
+
+  gap: 30px;
+}
 .nav-link {
   text-decoration: none;
 
@@ -447,8 +458,6 @@ button {
   transition: all 0.2s ease;
 
   display: inline-block;
-
-  margin-right: 10px;
 }
 .nav-link:hover {
   color: #f3c74d;
@@ -496,4 +505,82 @@ button {
   padding: 8px 14px;
 
   cursor: pointer;
+}
+
+.leaderboard-container {
+  max-width: 700px;
+
+  margin: auto;
+
+  padding: 20px;
+}
+
+.leaderboard-container h1 {
+  text-align: center;
+
+  margin-bottom: 30px;
+}
+
+.leaderboard-row {
+  display: flex;
+
+  justify-content: space-between;
+
+  align-items: center;
+
+  padding: 16px 24px;
+
+  margin-bottom: 12px;
+
+  background: #15223f;
+
+  border-radius: 14px;
+
+  transition: 0.2s;
+}
+
+.leaderboard-row:hover {
+  transform: translateY(-2px);
+
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.15);
+}
+
+.rank {
+  font-weight: bold;
+
+  width: 60px;
+}
+
+.leaderboard-user {
+  flex: 1;
+
+  font-size: 1.1rem;
+}
+
+.leaderboard-points {
+  font-weight: bold;
+
+  color: #ffd700;
+}
+
+#music-btn {
+  position: fixed;
+
+  bottom: 20px;
+
+  right: 20px;
+
+  padding: 10px 16px;
+
+  border: none;
+
+  border-radius: 12px;
+
+  background: #004bed;
+
+  color: white;
+
+  cursor: pointer;
+
+  z-index: 1000;
 }

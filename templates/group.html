@@ -41,7 +41,7 @@
 
       <div class="team">{{match["team2"]}}</div>
 
-      <p>{{match["kickoff"]}}</p>
+      <p>{{match["kickoff_display"]}}</p>
 
       {% if match["processed"] %}
 
@@ -145,7 +145,7 @@
         <button class="close-modal" data-modal="{{ match['id'] }}">✕</button>
       </div>
 
-      {% for i in range(5) %} {% for p in preds %}
+      {% for p in preds %}
 
       <div class="prediction-line">
         <span> {{ p["username"] }} </span>
@@ -164,7 +164,7 @@
         {% endif %}
       </div>
 
-      {% endfor %} {% endfor %}
+      {% endfor %} 
     </div>
   </div>
 
