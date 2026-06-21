@@ -1,5 +1,5 @@
 import sqlite3
-import secrets
+import os
 from flask import (
     Flask,
     render_template,
@@ -30,7 +30,10 @@ from helpers import (
 app = Flask(__name__)
 app.jinja_env.globals.update(prediction_closed=prediction_closed)
 
-app.secret_key = secrets.token_hex(16)
+app.secret_key = os.environ.get(
+    "SECRET_KEY",
+    "dev-secret-key"
+)
 
 
 def admin_required():
