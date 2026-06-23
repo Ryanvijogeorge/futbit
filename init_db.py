@@ -9,11 +9,12 @@ DATA_DIR = BASE_DIR / "data"
 DB_PATH = DATA_DIR / "worldcup.db"
 MATCHES_PATH = DATA_DIR / "matches.json"
 
-DATABASE_URL = os.environ["DATABASE_URL"]
+DATABASE_URL = "postgresql://neondb_owner:npg_pEGv3DORh1Kn@ep-mute-breeze-aoykew70-pooler.c-2.ap-southeast-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require"
+#os.environ["DATABASE_URL"]
 
 def get_connection():
     #os.environ["DATABASE_URL"]
-    return psycopg2.connect(DATABASE_URL)
+    return psycopg2.connect(os.environ["DATABASE_URL"])
 
 
 def create_tables(conn, cur):

@@ -60,9 +60,6 @@ def group(group_name):
     match_ids = [match["id"] for match in matches]
 
     all_predictions = get_predictions(match_ids)
-    print(all_predictions[0])
-    print(type(all_predictions[0]))
-
     predictions_by_match = {}
 
     for prediction in all_predictions:
