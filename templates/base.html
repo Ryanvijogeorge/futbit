@@ -23,12 +23,7 @@ filename='style.css') }}"
     />
   </head>
 
-  <body>
-    <audio id="bgmusic"></audio>
-
-    <button id="music-btn" style="display: none">▶ Enable Music</button>
-
-    <button id="mute-btn">🔊</button>
+  <body>  
 
     <nav class="nav-bar">
       <a class="nav-link" , href="{{ url_for('home') }}"> FUTBIT </a>
@@ -51,77 +46,6 @@ filename='style.css') }}"
 
     <main>{% block content %} {% endblock %}</main>
 
-    <script>
-      console.log("played");
-
-      const muteBtn = document.getElementById("mute-btn");
-      const musicBtn = document.getElementById("music-btn");
-      const audio = document.getElementById("bgmusic");
-
-      const songs = [
-        "/static/music/love_me_again.mp3",
-        "/static/music/worldcup.m4a",
-      ];
-
-      let idx = parseInt(localStorage.getItem("songIdx") || 0);
-
-      audio.src = songs[idx];
-
-      audio.addEventListener("loadedmetadata", () => {
-        audio.currentTime = parseFloat(localStorage.getItem("songTime") || 0);
-      });
-
-      audio.volume = 0.25;
-
-      audio.addEventListener("ended", () => {
-        idx = (idx + 1) % songs.length;
-
-        localStorage.setItem(
-          "songIdx",
-
-          idx,
-        );
-
-        localStorage.setItem(
-          "songTime",
-
-          0,
-        );
-
-        audio.src = songs[idx];
-
-        audio.play();
-      });
-
-      audio.play().catch(() => {
-        musicBtn.style.display = "block";
-      });
-
-      musicBtn.onclick = () => {
-        audio.play();
-
-        musicBtn.style.display = "none";
-      };
-
-      muteBtn.onclick = () => {
-        audio.muted = !audio.muted;
-
-        muteBtn.textContent = audio.muted ? "🔇" : "🔊";
-      };
-
-      window.addEventListener("beforeunload", () => {
-        localStorage.setItem(
-          "songIdx",
-
-          idx,
-        );
-
-        localStorage.setItem(
-          "songTime",
-
-          audio.currentTime,
-        );
-      });
-    </script>
+    
   </body>
 </html>

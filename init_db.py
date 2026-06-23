@@ -1,5 +1,7 @@
 import json
-import sqlite3
+import psycopg2
+from psycopg2.extras import DictCursor
+import os
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -7,26 +9,28 @@ DATA_DIR = BASE_DIR / "data"
 DB_PATH = DATA_DIR / "worldcup.db"
 MATCHES_PATH = DATA_DIR / "matches.json"
 
+DATABASE_URL = os.environ["DATABASE_URL"]
 
 def get_connection():
-    DATA_DIR.mkdir(exist_ok=True)
-    return sqlite3.connect(DB_PATH)
+    #os.environ["DATABASE_URL"]
+    return psycopg2.connect(DATABASE_URL)
 
 
-def create_tables(conn):
-    conn.execute("""
+def create_tables(conn, cur):
+    cur.execute("""
         CREATE TABLE IF NOT EXISTS users (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            id SERIAL PRIMARY KEY,
             username TEXT UNIQUE NOT NULL,
             password_hash TEXT NOT NULL,
             student_class INTEGER,
             division TEXT,
             is_admin INTEGER DEFAULT 0,
-            created_at DATETIME,
-            last_login DATETIME
+            created_at TIMESTAMPTZ,
+            last_login TIMESTAMPTZ,
+            points INTEGER DEFAULT 0
         )
         """)
-    conn.execute("""
+    cur.execute("""
         CREATE TABLE IF NOT EXISTS matches (
             id INTEGER PRIMARY KEY,
             team1 TEXT,
@@ -34,21 +38,21 @@ def create_tables(conn):
             group_name TEXT,
             stage TEXT,
             match_number INTEGER,
-            kickoff DATETIME,
+            kickoff TIMESTAMPTZ,
             score1 INTEGER,
             score2 INTEGER,
             status TEXT,
             processed INTEGER DEFAULT 0
         )
         """)
-    conn.execute("""
+    cur.execute("""
         CREATE TABLE IF NOT EXISTS predictions (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            id SERIAL PRIMARY KEY,
             user_id INTEGER,
             match_id INTEGER,
             pred1 INTEGER,
             pred2 INTEGER,
-            submitted_at DATETIME,
+            submitted_at TIMESTAMPTZ,
             points_awarded INTEGER DEFAULT 0,
             FOREIGN KEY(user_id) REFERENCES users(id),
             FOREIGN KEY(match_id) REFERENCES matches(id),
@@ -57,9 +61,9 @@ def create_tables(conn):
         """)
 
     print("creating standings")
-    conn.execute("""
+    cur.execute("""
         CREATE TABLE IF NOT EXISTS standings (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            id SERIAL PRIMARY KEY,
             group_name TEXT,
             team TEXT,
             played INTEGER DEFAULT 0,
@@ -81,7 +85,7 @@ def load_matches():
         return json.load(file)
 
 
-def insert_matches(conn, matches):
+def insert_matches(conn, cur, matches):
     rows = [
         (
             match["id"],
@@ -98,21 +102,40 @@ def insert_matches(conn, matches):
         )
         for match in matches
     ]
-    conn.executemany(
+    cur.executemany(
         """
-        INSERT OR REPLACE INTO matches (
-            id, team1, team2, group_name, stage, match_number,
-            kickoff, score1, score2, status, processed
-        )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO matches (
+        id, team1, team2, group_name,
+        stage, match_number,
+        kickoff, score1, score2,
+        status, processed
+    )
+
+    VALUES (
+        %s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s
+    )
+
+    ON CONFLICT (id)
+
+    DO UPDATE SET
+
+    team1 = EXCLUDED.team1,
+    team2 = EXCLUDED.team2,
+    group_name = EXCLUDED.group_name,
+    stage = EXCLUDED.stage,
+    match_number = EXCLUDED.match_number,
+    kickoff = EXCLUDED.kickoff,
+    score1 = EXCLUDED.score1,
+    score2 = EXCLUDED.score2,
+    status = EXCLUDED.status,
+    processed = EXCLUDED.processed
         """,
         rows,
     )
 
 
-def initialize_standings(conn):
-
-    teams = conn.execute("""
+def initialize_standings(conn, cur):
+    cur.execute("""
         SELECT DISTINCT
             group_name,
             team
@@ -134,23 +157,33 @@ def initialize_standings(conn):
         ORDER BY
             group_name,
             team
-        """).fetchall()
+        """)
+
+    teams = cur.fetchall()
 
     for group_name, team in teams:
 
-        conn.execute(
+        cur.execute(
             """
-            INSERT OR IGNORE INTO standings
-            (
-                group_name,
-                team
-            )
+        INSERT INTO standings
+        (
+            group_name,
+            team
+        )
 
-            VALUES
-            (
-                ?,
-                ?
-            )
+        VALUES
+        (
+            %s,
+            %s
+        )
+
+        ON CONFLICT
+        (
+            group_name,
+            team
+        )
+
+        DO NOTHING
             """,
             (group_name, team),
         )
@@ -158,25 +191,13 @@ def initialize_standings(conn):
 
 def initialize_database():
     with get_connection() as conn:
-        create_tables(conn)
-        insert_matches(conn, load_matches())
-        initialize_standings(conn)
+        cur = conn.cursor(cursor_factory=DictCursor)
+        create_tables(conn, cur)
+        insert_matches(conn, cur, load_matches())
+        initialize_standings(conn, cur)
         conn.commit()
 
 
 if __name__ == "__main__":
     initialize_database()
-    conn = get_connection()
-
-    conn.execute("""
-
-        ALTER TABLE users
-
-        ADD COLUMN points INTEGER DEFAULT 0
-
-        """)
-
-    conn.commit()
-
-    conn.close()
-    print(f"Database initialized at {DB_PATH}")
+    print(f"Database initialized at {DATABASE_URL}")

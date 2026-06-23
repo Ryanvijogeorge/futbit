@@ -1,126 +1,146 @@
-import sqlite3
+import os
+import psycopg2
+from psycopg2.extras import DictCursor
 from pathlib import Path
 from datetime import datetime, timedelta
+from time import perf_counter
+from flask import g
 
 BASE_DIR = Path(__file__).resolve().parent
 DB_PATH = BASE_DIR / "data" / "worldcup.db"
 
 
+
+
 def get_connection():
-    conn = sqlite3.connect(DB_PATH)
-    conn.row_factory = sqlite3.Row
-    conn.execute("PRAGMA foreign_keys = ON")
-    return conn
+    # FOR DEPLOYMENT return psycopg2.connect(os.environ["DATABASE_URL"])
+    t = perf_counter()
+    if "db" not in g:
+        print("NEW CONNECTION")
+        g.db = psycopg2.connect(os.environ["DATABASE_URL"])
+        g.cur = g.db.cursor(cursor_factory=DictCursor)
+        print("connect took", perf_counter()-t)
+    return g.db, g.cur
 
 
 def get_groups():
-    conn = get_connection()
+    conn, cur = get_connection()
 
-    groups = conn.execute("""
+    cur.execute("""
         SELECT DISTINCT group_name
         FROM matches
         WHERE stage='Group Stage'
         ORDER BY group_name
-        """).fetchall()
+        """)
+
+    groups = cur.fetchall()
 
     result = {}
 
     for group in groups:
 
-        teams = conn.execute(
+        cur.execute(
             """
             SELECT DISTINCT team
             FROM (
 
                 SELECT team1 AS team
                 FROM matches
-                WHERE group_name=?
+                WHERE group_name=%s
 
                 UNION
 
                 SELECT team2 AS team
                 FROM matches
-                WHERE group_name=?
+                WHERE group_name=%s
 
             )
 
             ORDER BY team
             """,
             (group["group_name"], group["group_name"]),
-        ).fetchall()
+        )
+
+        teams = cur.fetchall()
 
         result[group["group_name"]] = [t["team"] for t in teams]
 
-    conn.close()
+    #conn.close()
 
     return result
 
 
 def get_matches_by_group(group_name):
 
-    conn = get_connection()
+    conn, cur = get_connection()
 
-    matches = conn.execute(
+    cur.execute(
         """
         SELECT *
         FROM matches
-        WHERE group_name=?
+        WHERE group_name=%s
         ORDER BY kickoff
         """,
         (group_name,),
-    ).fetchall()
+    )
 
-    conn.close()
+    matches = cur.fetchall()
+
+    #conn.close()
 
     return matches
 
 
 def get_standings(group_name):
 
-    conn = get_connection()
+    conn, cur = get_connection()
 
-    standings = conn.execute(
+    cur.execute(
         """
         SELECT *
         FROM standings
-        WHERE group_name=?
+        WHERE group_name=%s
         ORDER BY
             position ASC
         """,
         (group_name,),
-    ).fetchall()
+    )
 
-    conn.close()
+    standings = cur.fetchall()
+
+    #conn.close()
 
     return standings
 
 
 def get_match(match_id):
 
-    conn = get_connection()
+    conn, cur = get_connection()
 
-    match = conn.execute(
+    cur.execute(
         """
         SELECT *
 
         FROM matches
 
-        WHERE id = ?
+        WHERE id = %s
 
         """,
         (match_id,),
-    ).fetchone()
+    )
 
-    conn.close()
+    match = cur.fetchone()
+
+    #conn.close()
 
     return match
 
 
 def get_prediction(user_id, match_id):
 
-    conn = get_connection()
+    conn, cur = get_connection()
 
-    prediction = conn.execute(
+    cur.execute(
         """
 
         SELECT *
@@ -131,20 +151,22 @@ def get_prediction(user_id, match_id):
         WHERE
 
 
-        user_id = ?
+        user_id = %s
 
 
         AND
 
 
-        match_id = ?
+        match_id = %s
 
 
         """,
         (user_id, match_id),
-    ).fetchone()
+    )
 
-    conn.close()
+    prediction = cur.fetchone()
+
+    #conn.close()
 
     return prediction
 
@@ -153,9 +175,9 @@ def prediction_closed(match_id):
 
     match = get_match(match_id)
 
-    kickoff = datetime.fromisoformat(match["kickoff"])
+    kickoff = match["kickoff"]
 
-    lock_time = kickoff - timedelta(minutes=20)
+    lock_time = kickoff - timedelta(minutes=10)
 
     now = datetime.now(kickoff.tzinfo)
 
@@ -164,142 +186,48 @@ def prediction_closed(match_id):
 
 def save_prediction(user_id, match_id, pred1, pred2):
 
-    conn = get_connection()
+    conn, cur = get_connection()
 
-    existing = conn.execute(
+    cur.execute(
         """
-
-        SELECT id
-
-
-        FROM predictions
-
-
-        WHERE
-
-
-        user_id = ?
-
-
-        AND
-
-
-        match_id = ?
-
-
-        """,
-        (user_id, match_id),
-    ).fetchone()
-
-    submitted_at = datetime.now().isoformat()
-
-    if existing:
-
-        conn.execute(
-            """
-
-            UPDATE predictions
-
-
-            SET
-
-
-            pred1 = ?,
-
-
-            pred2 = ?,
-
-
-            submitted_at = ?
-
-
-
-            WHERE
-
-
-            user_id = ?
-
-
-            AND
-
-
-            match_id = ?
-
-
-
-            """,
-            (pred1, pred2, submitted_at, user_id, match_id),
-        )
-
-    else:
-
-        conn.execute(
-            """
-
-            INSERT INTO predictions
-
-
-            (
-
-
-
+        INSERT INTO predictions
+        (
             user_id,
-
             match_id,
-
             pred1,
-
             pred2,
-
             submitted_at
-
-
-
-            )
-
-
-
-            VALUES
-
-
-
-            (
-
-
-            ?,
-
-
-            ?,
-
-
-            ?,
-
-
-            ?,
-
-
-            ?
-
-
-
-            )
-
-
-
-            """,
-            (user_id, match_id, pred1, pred2, submitted_at),
         )
+
+        VALUES
+        (
+            %s,
+            %s,
+            %s,
+            %s,
+            %s
+        )
+
+        ON CONFLICT (user_id, match_id)
+
+        DO UPDATE SET
+
+            pred1 = EXCLUDED.pred1,
+            pred2 = EXCLUDED.pred2,
+            submitted_at = EXCLUDED.submitted_at
+        """,
+        (user_id, match_id, pred1, pred2, datetime.now()),
+    )
 
     conn.commit()
-
-    conn.close()
+    #conn.close()
 
 
 def get_match_predictions(match_id):
 
-    conn = get_connection()
+    conn, cur = get_connection()
 
-    predictions = conn.execute(
+    cur.execute(
         """
 
         SELECT
@@ -324,22 +252,48 @@ def get_match_predictions(match_id):
         ON users.id = predictions.user_id
 
 
-        WHERE match_id = ?
+        WHERE match_id = %s
 
         """,
         (match_id,),
-    ).fetchall()
+    )
 
-    conn.close()
+    predictions = cur.fetchall()
+
+    #conn.close()
+
+    return predictions
+
+
+def get_predictions(match_ids):
+
+    conn, cur = get_connection()
+
+    cur.execute(
+        """
+
+        SELECT *
+
+        FROM predictions
+
+        WHERE match_id = ANY(%s)
+
+        """,
+        (match_ids,),
+    )
+
+    predictions = cur.fetchall()
+
+    #conn.close()
 
     return predictions
 
 
 def get_all_matches():
 
-    conn = get_connection()
+    conn, cur = get_connection()
 
-    matches = conn.execute("""
+    cur.execute("""
 
         SELECT *
 
@@ -348,9 +302,11 @@ def get_all_matches():
 
         ORDER BY kickoff
 
-        """).fetchall()
+        """)
 
-    conn.close()
+    matches = cur.fetchall()
+
+    #conn.close()
 
     return matches
 
@@ -383,9 +339,9 @@ def calculate_points(pred1, pred2, score1, score2):
 
 def recompute_match_points(match_id):
 
-    conn = get_connection()
+    conn, cur = get_connection()
 
-    match = conn.execute(
+    cur.execute(
         """
 
         SELECT score1,
@@ -396,13 +352,15 @@ def recompute_match_points(match_id):
         FROM matches
 
 
-        WHERE id=?
+        WHERE id=%s
 
         """,
         (match_id,),
-    ).fetchone()
+    )
 
-    predictions = conn.execute(
+    match = cur.fetchone()
+
+    cur.execute(
         """
 
         SELECT *
@@ -411,11 +369,13 @@ def recompute_match_points(match_id):
         FROM predictions
 
 
-        WHERE match_id=?
+        WHERE match_id=%s
 
         """,
         (match_id,),
-    ).fetchall()
+    )
+
+    predictions = cur.fetchall()
 
     for prediction in predictions:
 
@@ -427,31 +387,31 @@ def recompute_match_points(match_id):
 
         delta = new_points - old_points
 
-        conn.execute(
+        cur.execute(
             """
 
             UPDATE users
 
 
-            SET points = points + ?
+            SET points = points + %s
 
 
-            WHERE id = ?
+            WHERE id = %s
 
             """,
             (delta, prediction["user_id"]),
         )
 
-        conn.execute(
+        cur.execute(
             """
 
             UPDATE predictions
 
 
-            SET points_awarded=?
+            SET points_awarded=%s
 
 
-            WHERE id=?
+            WHERE id=%s
 
             """,
             (new_points, prediction["id"]),
@@ -459,14 +419,14 @@ def recompute_match_points(match_id):
 
     conn.commit()
 
-    conn.close()
+    #conn.close()
 
 
 def process_match(match_id, score1, score2):
 
-    conn = get_connection()
+    conn, cur = get_connection()
 
-    conn.execute(
+    cur.execute(
         """
 
         UPDATE matches
@@ -475,16 +435,16 @@ def process_match(match_id, score1, score2):
         SET
 
 
-        score1=?,
+        score1=%s,
 
-        score2=?,
+        score2=%s,
 
         status='Completed',
 
         processed=1
 
 
-        WHERE id=?
+        WHERE id=%s
 
 
         """,
@@ -493,16 +453,16 @@ def process_match(match_id, score1, score2):
 
     conn.commit()
 
-    conn.close()
+    #conn.close()
 
     recompute_match_points(match_id)
 
 
 def update_standing(group_name, team, position, points):
 
-    conn = get_connection()
+    conn, cur = get_connection()
 
-    conn.execute(
+    cur.execute(
         """
 
         UPDATE standings
@@ -511,19 +471,19 @@ def update_standing(group_name, team, position, points):
         SET
 
 
-            position = ?,
+            position = %s,
 
 
-            points = ?
+            points = %s
 
 
         WHERE
 
 
-            group_name = ?
+            group_name = %s
 
 
-            AND team = ?
+            AND team = %s
 
         """,
         (position, points, group_name, team),
@@ -531,14 +491,14 @@ def update_standing(group_name, team, position, points):
 
     conn.commit()
 
-    conn.close()
+    #conn.close()
 
 
 def get_leaderboard():
 
-    conn = get_connection()
+    conn, cur = get_connection()
 
-    leaderboard = conn.execute("""
+    cur.execute("""
 
         SELECT
 
@@ -554,8 +514,10 @@ def get_leaderboard():
 
             username ASC
 
-        """).fetchall()
+        """)
 
-    conn.close()
+    leaderboard = cur.fetchall()
+
+    #conn.close()
 
     return leaderboard

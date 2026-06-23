@@ -1,4 +1,5 @@
-import sqlite3
+import psycopg2
+from psycopg2.extras import DictCursor
 import os
 from flask import (
     Flask,
@@ -8,7 +9,11 @@ from flask import (
     url_for,
     session,
     flash,
+    g
 )
+from datetime import datetime, timezone, timedelta
+
+DATABASE_URL = os.env
 
 from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -25,17 +30,15 @@ from helpers import (
     process_match,
     update_standing,
     get_leaderboard,
+    get_predictions
 )
 
 app = Flask(__name__)
 app.jinja_env.globals.update(prediction_closed=prediction_closed)
 
-app.secret_key = os.environ.get(
-    "SECRET_KEY",
-    "dev-secret-key"
-)
+app.secret_key = os.environ.get("SECRET_KEY", "dev-secret-key")
 
-
+DATABASE_URL = os.environ["DATABASE_URL"]
 def admin_required():
 
     return session.get("user_id") == 1
@@ -56,20 +59,38 @@ def group(group_name):
 
     standings = get_standings(group_name)
 
+    match_ids = [match["id"] for match in matches]
+
+    all_predictions = get_predictions(match_ids)
+
+    predictions_by_match = {}
+
+    for prediction in all_predictions:
+
+        predictions_by_match.setdefault(
+
+            prediction["match_id"],
+
+            []
+
+        ).append(prediction)
+
     predictions = {}
     prediction_visibility = {}
 
+    now = datetime.now(timezone.utc)
+
     for match in matches:
 
-        preds = get_match_predictions(match["id"])
+        preds = predictions_by_match.get(match["id"], [])
 
-        if prediction_closed(match["id"]):
+        closed = now > match["kickoff"] + timedelta(minutes=30)
 
+        if closed:
             preds.sort(key=lambda p: (-p["points_awarded"], p["submitted_at"]))
-
         else:
-
             preds.sort(key=lambda p: p["submitted_at"])
+
         prediction_visibility[match["id"]] = preds
 
     if "user_id" in session:
@@ -127,20 +148,21 @@ def login():
 
         password = request.form["password"]
 
-        conn = get_connection()
+        conn, cur = get_connection()
 
-        user = conn.execute(
+        cur.execute(
             """
 
             SELECT *
 
             FROM users
 
-            WHERE username = ?
+            WHERE username = %s
 
             """,
             (username,),
-        ).fetchone()
+        )
+        user = cur.fetchone()
 
         conn.close()
 
@@ -170,73 +192,33 @@ def register():
 
         password_hash = generate_password_hash(password)
 
-        conn = get_connection()
+        conn, cur = get_connection()
 
         try:
-            conn.execute(
+            cur.execute(
                 """
+    INSERT INTO users
+    (
+        username,
+        password_hash,
+        student_class,
+        division
+    )
 
-                INSERT INTO users
+    VALUES
+    (
+        %s,
+        %s,
+        %s,
+        %s
+    )
 
-
-                (
-
-
-                username,
-
-
-                password_hash,
-
-
-                student_class,
-
-
-                division
-
-
-                )
-
-
-                VALUES
-
-
-                (
-
-
-                ?,
-
-
-                ?,
-
-
-                ?,
-
-
-                ?
-
-
-                )
-
-
-                """,
+    RETURNING id
+    """,
                 (username, password_hash, student_class, division),
             )
 
-            conn.commit()
-
-            user = conn.execute(
-                """
-
-                SELECT id
-
-                FROM users
-
-
-                WHERE username = ?
-
-                """,
-                (username,),
-            ).fetchone()
+            user = cur.fetchone()
 
             session["user_id"] = user["id"]
 
@@ -246,9 +228,9 @@ def register():
 
             return redirect(session.pop("next_url", url_for("home")))
 
-        except sqlite3.IntegrityError:
+        except psycopg2.IntegrityError:
+            conn.rollback()    
             flash("Username already exists.")
-
             conn.close()
 
     return render_template("register.html")
@@ -328,6 +310,14 @@ def leaderboard():
     leaderboard = get_leaderboard()
 
     return render_template("leaderboard.html", leaderboard=leaderboard)
+
+@app.teardown_appcontext
+def close_connection(exception):
+
+    conn = g.pop("db", None)
+
+    if conn:
+        conn.close()
 
 
 if __name__ == "__main__":
