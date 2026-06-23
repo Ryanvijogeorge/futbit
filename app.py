@@ -60,7 +60,8 @@ def group(group_name):
     match_ids = [match["id"] for match in matches]
 
     all_predictions = get_predictions(match_ids)
-    print(all_predictions[:3])
+    print(all_predictions[0])
+    print(type(all_predictions[0]))
 
     predictions_by_match = {}
 
@@ -241,11 +242,11 @@ def admin():
     if not admin_required():
         return redirect(url_for("home"))
 
-    conn = get_connection()
+    conn, cur = get_connection()
 
     matches = get_all_matches()
 
-    standings = conn.execute("""
+    cur.execute("""
 
         SELECT *
 
@@ -257,7 +258,9 @@ def admin():
 
             position
 
-        """).fetchall()
+        """)
+    
+    standings = cur.fetchall()
 
     return render_template("admin.html", matches=matches, standings=standings)
 
