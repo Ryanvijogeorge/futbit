@@ -265,27 +265,19 @@ def get_match_predictions(match_id):
 
 
 def get_predictions(match_ids):
-
     conn, cur = get_connection()
 
-    cur.execute(
-        """
+    cur.execute("""
+        SELECT
+            p.*,
+            u.username
+        FROM predictions p
+        JOIN users u
+            ON p.user_id = u.id
+        WHERE p.match_id = ANY(%s)
+    """, (match_ids,))
 
-        SELECT *
-
-        FROM predictions
-
-        WHERE match_id = ANY(%s)
-
-        """,
-        (match_ids,),
-    )
-
-    predictions = cur.fetchall()
-
-    #conn.close()
-
-    return predictions
+    return cur.fetchall()
 
 
 def get_all_matches():
