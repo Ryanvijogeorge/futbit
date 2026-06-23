@@ -222,7 +222,7 @@ def register():
 
             session["username"] = username
 
-            conn.close()
+            conn.commit()
 
             return redirect(session.pop("next_url", url_for("home")))
 

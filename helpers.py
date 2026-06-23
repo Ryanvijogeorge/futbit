@@ -13,7 +13,6 @@ DB_PATH = BASE_DIR / "data" / "worldcup.db"
 
 
 def get_connection():
-    # FOR DEPLOYMENT return psycopg2.connect(os.environ["DATABASE_URL"])
     t = perf_counter()
     if "db" not in g:
         print("NEW CONNECTION")
