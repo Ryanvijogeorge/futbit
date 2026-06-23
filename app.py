@@ -13,8 +13,6 @@ from flask import (
 )
 from datetime import datetime, timezone, timedelta
 
-DATABASE_URL = os.env
-
 from werkzeug.security import generate_password_hash, check_password_hash
 
 from helpers import (
