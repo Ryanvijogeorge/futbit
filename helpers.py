@@ -9,14 +9,16 @@ from flask import g
 BASE_DIR = Path(__file__).resolve().parent
 DB_PATH = BASE_DIR / "data" / "worldcup.db"
 
-
+#os.environ["DATABASE_URL"]
+DATABASE_URL = "postgresql://neondb_owner:npg_Ca5Me1dwFSXN@ep-summer-lake-ao8jq9hi-pooler.c-2.ap-southeast-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require"
 
 
 def get_connection():
     t = perf_counter()
     if "db" not in g:
         print("NEW CONNECTION")
-        g.db = psycopg2.connect(os.environ["DATABASE_URL"])
+        print(os.environ.get("DATABASE_URL"))
+        g.db = psycopg2.connect(DATABASE_URL)
         g.cur = g.db.cursor(cursor_factory=DictCursor)
         print("connect took", perf_counter()-t)
     return g.db, g.cur
@@ -290,16 +292,24 @@ def get_all_matches():
 
         FROM matches
 
+        ORDER BY
 
-        ORDER BY kickoff
+        CASE status
+
+            WHEN 'upcoming' THEN 0
+
+            WHEN 'Completed' THEN 1
+
+        END,
+
+        kickoff ASC
 
         """)
 
     matches = cur.fetchall()
 
-    #conn.close()
-
     return matches
+    
 
 
 def calculate_points(pred1, pred2, score1, score2):

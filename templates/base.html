@@ -23,18 +23,25 @@ filename='style.css') }}"
     />
   </head>
 
-  <body>  
-
+  <body>
     <nav class="nav-bar">
-      <a class="nav-link" , href="{{ url_for('home') }}"> FUTBIT </a>
+      <a class="nav-link" href="{{url_for('home')}}"> FUTBIT </a>
 
-      <a class="nav-link" href="{{ url_for('leaderboard') }}"> LEADERBOARD </a>
+      <div class="nav-right">
+        <a class="nav-link" href="{{url_for('leaderboard')}}"> Leaderboard </a>
 
-      {% if session.get("user_id") %}
+        {% if session.get("user_id") %}
 
-      <a class="nav-link" , href="{{url_for('logout')}}"> Logout </a>
+        <a class="nav-link" href="{{url_for('logout')}}"> Logout </a>
 
-      {% endif %}
+        {% else %}
+
+        <a class="nav-link" href="{{url_for('login')}}"> Login </a>
+
+        <a class="nav-link" href="{{url_for('register')}}"> Register </a>
+
+        {% endif %}
+      </div>
     </nav>
 
     {% with messages = get_flashed_messages() %} {% if messages %} {% for
@@ -45,7 +52,5 @@ filename='style.css') }}"
     {% endfor %} {% endif %} {% endwith %}
 
     <main>{% block content %} {% endblock %}</main>
-
-    
   </body>
 </html>

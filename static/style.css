@@ -39,98 +39,25 @@ main {
   margin: auto;
 }
 
-.page-title {
-  text-align: center;
-  font-size: medium;
-  margin-bottom: 40px;
-}
+/* ---------- MATCH GRID ---------- */
 
-.groups-grid {
+.matches-container {
   display: grid;
 
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
 
-  gap: 30px;
+  gap: 25px;
 }
 
-.group-card {
-  background: #15223f;
+/* ---------- PHONE ---------- */
 
-  padding: 25px;
-
-  border-radius: 20px;
-
-  text-decoration: none;
-
-  color: white;
-
-  transition: 0.25s;
-}
-
-.group-card:hover {
-  transform: translateY(-5px);
-
-  box-shadow: 0 0 25px rgba(0, 190, 255, 0.35);
-}
-
-.team-list {
-  margin-top: 25px;
-}
-
-.team-list p {
-  padding: 6px;
-
-  margin: 0;
-}
-
-.group-layout {
-  display: grid;
-
-  grid-template-columns: 320px 1fr;
-
-  gap: 40px;
-}
-
-@media (max-width: 900px) {
-  .group-layout {
+@media (max-width: 700px) {
+  .matches-container {
     grid-template-columns: 1fr;
   }
 }
 
-.standings-card {
-  background: #15223f;
-
-  padding: 20px;
-
-  border-radius: 20px;
-
-  align-self: start;
-
-  position: sticky;
-  top: 20px;
-}
-
-table {
-  width: 100%;
-}
-
-th {
-  text-align: left;
-
-  padding: 10px;
-}
-
-td {
-  padding: 10px;
-}
-
-.matches-section {
-  display: grid;
-
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-
-  gap: 25px;
-}
+/* ---------- MATCH CARD ---------- */
 
 .match-card {
   background: #15223f;
@@ -150,10 +77,52 @@ td {
   box-shadow: 0 0 25px rgba(0, 190, 255, 0.35);
 }
 
+/* ---------- TEAMS ---------- */
+
+.teams {
+  display: flex;
+
+  justify-content: space-around;
+
+  align-items: center;
+
+  margin-bottom: 18px;
+}
+
 .team {
-  font-size: 20px;
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+
+  gap: 8px;
+
+  font-size: 18px;
 
   font-weight: 600;
+}
+
+/* ---------- FLAGS ---------- */
+
+.flag-placeholder {
+  width: 42px;
+
+  height: 42px;
+
+  border-radius: 50%;
+
+  background: #1f3159;
+}
+
+.flag {
+  width: 42px;
+
+  height: 42px;
+
+  object-fit: cover;
+
+  border-radius: 50%;
 }
 
 .vs {
@@ -325,7 +294,9 @@ button {
   font-weight: bold;
 }
 
-.closed-text {
+/* ---------- CLOSED ---------- */
+
+.closed {
   color: #ff7070;
 
   font-weight: bold;
@@ -441,15 +412,46 @@ button {
   color: #f3c74d;
 }
 
+/* Entire navbar at top of page */
 .nav-bar {
+  /* Put FUTBIT on left and links on right */
   display: flex;
 
-  justify-content: center;
+  /* Push left and right sections apart */
+  justify-content: space-between;
 
+  /* Vertically center everything */
   align-items: center;
 
-  gap: 30px;
+  /* Space around navbar content */
+  padding: 18px 32px;
+
+  /* Keep navbar visible while scrolling */
+  position: sticky;
+
+  /* Stick to top edge */
+  top: 0;
+
+  /* Ensure navbar stays above cards */
+  z-index: 100;
+
+  /* Slight transparency */
+  background: #07121fdd;
+
+  /* Frosted glass effect */
+  backdrop-filter: blur(10px);
 }
+
+/* Container holding leaderboard login logout */
+.nav-right {
+  display: flex;
+
+  /* Space between links */
+  gap: 25px;
+
+  align-items: center;
+}
+
 .nav-link {
   text-decoration: none;
 
@@ -465,6 +467,56 @@ button {
   text-shadow: 0 0 8px rgba(243, 199, 77, 0.5);
 
   transform: scale(1.05);
+}
+
+/* ---------- HERO ---------- */
+
+.hero {
+  text-align: center;
+
+  padding: 25px 0 40px 0;
+}
+
+.hero h1 {
+  font-size: 3rem;
+
+  margin-bottom: 10px;
+}
+
+.hero p {
+  opacity: 0.8;
+
+  margin-bottom: 25px;
+}
+
+.hero-buttons {
+  display: flex;
+
+  justify-content: center;
+
+  gap: 15px;
+
+  flex-wrap: wrap;
+}
+
+.hero-btn {
+  padding: 12px 24px;
+
+  border-radius: 10px;
+
+  background: #00c8ff;
+
+  text-decoration: none;
+
+  color: black;
+
+  font-weight: 700;
+}
+
+.hero-btn.secondary {
+  background: #1f3159;
+
+  color: white;
 }
 
 .admin-container {
@@ -583,4 +635,54 @@ button {
   cursor: pointer;
 
   z-index: 1000;
+}
+
+/* ---------- KICKOFF ---------- */
+
+.kickoff {
+  margin-bottom: 20px;
+
+  font-size: 0.95rem;
+
+  opacity: 0.75;
+}
+
+/* ---------- GUEST ---------- */
+
+.guest-lock {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 10px;
+
+  align-items: center;
+}
+
+.login-predict {
+  padding: 10px 18px;
+
+  border-radius: 8px;
+
+  background: #00c8ff;
+
+  text-decoration: none;
+
+  color: black;
+
+  font-weight: bold;
+}
+
+/* ---------- PREDICT ---------- */
+
+.predict-btn {
+  padding: 10px 18px;
+
+  background: #00bfff;
+
+  border-radius: 8px;
+
+  font-weight: bold;
+
+  cursor: pointer;
 }

@@ -1,73 +1,156 @@
-{% extends "base.html" %}
+{% extends "base.html" %} {% block content %}
 
+<div class="hero">
+  ```
+  <h1>FUTBIT</h1>
 
+  <p>Predict World Cup matches and climb the leaderboard</p>
 
-{% block content %}
+  {% if not session.get("user_id") %}
 
-
-<h1 class="page-title">
-
-Predict 10 mins before kickoff
-
-</h1>
-
-
-
-
-<div class="groups-grid">
-
-
-{% for group,teams in groups.items() %}
-
-
-<a
-
-href="{{ url_for('group',
-group_name=group) }}"
-
-class="group-card"
-
-
->
-
-
-<h2>
-
-Group {{group}}
-
-</h2>
-
-
-
-<div class="team-list">
-
-
-{% for team in teams %}
-
-
-<p>
-
-{{team}}
-
-</p>
-
-
-{% endfor %}
-
-
-
+ 
+  {% endif %} ```
 </div>
 
+<h2 class="section-title">``` Upcoming Matches ```</h2>
 
-</a>
+<div class="matches-container">
+  {% for match in matches %}
 
+  <div class="match-card" id="match-{{match['id']}}">
+    ```
+    <div class="teams">
+      <div class="team">
+        <!-- FLAG HERE -->
 
-{% endfor %}
+        <div class="flag-placeholder"></div>
 
+        <span> {{match["team1"]}} </span>
+      </div>
 
+      <div class="vs">VS</div>
+
+      <div class="team">
+        <!-- FLAG HERE -->
+
+        <div class="flag-placeholder"></div>
+
+        <span> {{match["team2"]}} </span>
+      </div>
+    </div>
+
+    <div class="kickoff">{{match["kickoff_display"]}}</div>
+    ``` {% if session.get("user_id") %} ``` {% if prediction_closed(match["id"])
+    %}
+
+    <div class="closed">Predictions Closed</div>
+
+    {% else %} ```
+
+    <form
+      method="POST"
+      action="{{url_for(
+
+'predict',
+
+match_id=match['id']
+
+)}}"
+    >
+      <input
+        type="number"
+        name="pred1"
+        min="0"
+        max="20"
+        required
+        value="{{predictions.get(
+
+match['id'],
+
+{}
+
+).get(
+
+'pred1',
+
+''
+
+)}}"
+      />
+
+      *
+
+      <input
+        type="number"
+        name="pred2"
+        min="0"
+        max="20"
+        required
+        value="{{predictions.get(
+
+match['id'],
+
+{}
+
+).get(
+
+'pred2',
+
+''
+
+)}}"
+      />
+
+      <button class="predict-btn">Save</button>
+    </form>
+
+    ``` {% endif %} ``` {% else %}
+
+    <div class="guest-lock">
+      <input type="number" placeholder="0" disabled />
+
+      *
+
+      <input type="number" placeholder="0" disabled />
+
+      <a href="{{url_for('login')}}" class="login-predict">
+        Login to Predict
+      </a>
+    </div>
+
+    {% endif %} {% if prediction_visibility.get(match["id"]) %}
+
+    <button class="show-more" data-match="{{match['id']}}">
+      Show Predictions
+    </button>
+
+    {% endif %}
+  </div>
+
+  {% endfor %}
 </div>
 
+<div class="modal" id="prediction-modal">
+  <div class="modal-content">
+    <span id="close-modal"> × </span>
 
+    <div id="modal-body"></div>
+  </div>
+</div>
 
+<script>
+  document
+    .querySelectorAll(".show-more")
+
+    .forEach((btn) => {
+      btn.onclick = () => {
+        document.getElementById("prediction-modal").style.display = "flex";
+      };
+    });
+
+  document.getElementById("close-modal").onclick = () => {
+    document.getElementById("prediction-modal").style.display = "none";
+  };
+</script>
 
 {% endblock %}

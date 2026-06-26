@@ -1,16 +1,7 @@
 import psycopg2
 from psycopg2.extras import DictCursor
 import os
-from flask import (
-    Flask,
-    render_template,
-    request,
-    redirect,
-    url_for,
-    session,
-    flash,
-    g
-)
+from flask import Flask, render_template, request, redirect, url_for, session, flash, g
 from datetime import datetime, timezone, timedelta
 
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -28,7 +19,7 @@ from helpers import (
     process_match,
     update_standing,
     get_leaderboard,
-    get_predictions
+    get_predictions,
 )
 
 app = Flask(__name__)
@@ -36,7 +27,10 @@ app.jinja_env.globals.update(prediction_closed=prediction_closed)
 
 app.secret_key = os.environ.get("SECRET_KEY", "dev-secret-key")
 
-DATABASE_URL = os.environ["DATABASE_URL"]
+#os.environ["DATABASE_URL"]
+DATABASE_URL = "postgresql://neondb_owner:npg_Ca5Me1dwFSXN@ep-summer-lake-ao8jq9hi-pooler.c-2.ap-southeast-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require"
+
+
 def admin_required():
 
     return session.get("user_id") == 1
@@ -45,9 +39,54 @@ def admin_required():
 @app.route("/")
 def home():
 
-    groups = get_groups()
+    matches = get_all_matches()
 
-    return render_template("home.html", groups=groups)
+    predictions = {}
+
+    prediction_visibility = {}
+
+    match_ids = [m["id"] for m in matches]
+
+    all_predictions = get_predictions(match_ids)
+
+    predictions_by_match = {}
+
+    for prediction in all_predictions:
+
+        predictions_by_match.setdefault(prediction["match_id"], []).append(prediction)
+
+    now = datetime.now(timezone.utc)
+
+    for match in matches:
+
+        preds = predictions_by_match.get(match["id"], [])
+
+        closed = now > match["kickoff"] + timedelta(minutes=30)
+
+        if closed:
+
+            preds.sort(key=lambda p: (-p["points_awarded"], p["submitted_at"]))
+
+        else:
+
+            preds.sort(key=lambda p: p["submitted_at"])
+
+        prediction_visibility[match["id"]] = preds
+
+    if "user_id" in session:
+
+        for match in matches:
+
+            pred = get_prediction(session["user_id"], match["id"])
+
+            predictions[match["id"]] = pred
+
+    return render_template(
+        "home.html",
+        matches=matches,
+        predictions=predictions,
+        prediction_visibility=prediction_visibility,
+    )
 
 
 @app.route("/group/<group_name>")
@@ -64,13 +103,7 @@ def group(group_name):
 
     for prediction in all_predictions:
 
-        predictions_by_match.setdefault(
-
-            prediction["match_id"],
-
-            []
-
-        ).append(prediction)
+        predictions_by_match.setdefault(prediction["match_id"], []).append(prediction)
 
     predictions = {}
     prediction_visibility = {}
@@ -132,9 +165,7 @@ def predict(match_id):
 
     flash("Prediction saved.")
 
-    group_name = request.form["group_name"]
-
-    return redirect(url_for("group", group_name=group_name) + f"#match-{match_id}")
+    return redirect(url_for("home") + f"#match-{match_id}")
 
 
 @app.route("/login", methods=["GET", "POST"])
@@ -226,7 +257,7 @@ def register():
             return redirect(session.pop("next_url", url_for("home")))
 
         except psycopg2.IntegrityError:
-            conn.rollback()    
+            conn.rollback()
             flash("Username already exists.")
             conn.close()
 
@@ -256,7 +287,7 @@ def admin():
             position
 
         """)
-    
+
     standings = cur.fetchall()
 
     return render_template("admin.html", matches=matches, standings=standings)
@@ -310,6 +341,7 @@ def leaderboard():
 
     return render_template("leaderboard.html", leaderboard=leaderboard)
 
+
 @app.teardown_appcontext
 def close_connection(exception):
 
@@ -320,4 +352,4 @@ def close_connection(exception):
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(host="0.0.0.0", debug=True)
