@@ -63,20 +63,7 @@ match_id=match['id']
         min="0"
         max="20"
         required
-        value="{{predictions.get(
-
-match['id'],
-
-{}
-
-).get(
-
-'pred1',
-
-''
-
-)}}"
-      />
+        value="{{ ((predictions or {}).get(match['id']) or {}).get('pred1','') }}"/>
 
       *
 
@@ -86,21 +73,7 @@ match['id'],
         min="0"
         max="20"
         required
-        value="{{predictions.get(
-
-match['id'],
-
-{}
-
-).get(
-
-'pred2',
-
-''
-
-)}}"
-      />
-
+        value="{{ ((predictions or {}).get(match['id']) or {}).get('pred2','') }}"/>
       <button class="predict-btn">Save</button>
     </form>
 
