@@ -81,6 +81,10 @@ def home():
 
             predictions[match["id"]] = pred
 
+    predictions = predictions or {}
+
+    prediction_visibility = prediction_visibility or{}
+
     return render_template(
         "home.html",
         matches=matches,
