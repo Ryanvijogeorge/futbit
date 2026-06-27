@@ -27,26 +27,26 @@ filename='style.css') }}"
     <nav class="nav-bar">
       <a class="logo" href="{{url_for('home')}}"> FUTBIT </a>
 
-      <button class  = "hamburger">☰</button>
+      <button class="hamburger">☰</button>
 
-      <div class = "nav-right">
-        <a class = "nav-link" href="{{url_for('leaderboard')}}">Leaderboard</a>
+      <div class="nav-right">
+        <a class="nav-link" href="{{url_for('leaderboard')}}">Leaderboard</a>
 
         {% if session.get("user_id") %}
 
-        <a class = "nav-link" href="{{url_for('logout')}}">Logout</a>
+        <a class="nav-link" href="{{url_for('logout')}}">Logout</a>
 
         {% else %}
 
-        <a class = nav-link" href="{{url_for('login')}}">Login</a>
+        <a class="nav-link" href="{{url_for('login')}}">Login</a>
 
-        <a class = "nav-link" href="{{url_for('register')}}">Register</a>
+        <a class="nav-link" href="{{url_for('register')}}">Register</a>
 
         {% endif %}
       </div>
     </nav>
 
-    <div class = "mobile-overlay"></div>
+    <div class="mobile-overlay"></div>
 
     {% with messages = get_flashed_messages() %} {% if messages %} {% for
     message in messages %}
@@ -65,13 +65,21 @@ filename='style.css') }}"
       const overlay = document.querySelector(".mobile-overlay");
 
       burger.onclick = function () {
-        menu.classList.toggle("mobile-open");
+        burger.onclick = function () {
+          console.log("clicked");
 
-        overlay.classList.toggle("show");
+          menu.classList.toggle("mobile-open");
 
-        document.body.style.overflow = menu.classList.contains("mobile-open")
-          ? "hidden"
-          : "";
+          overlay.classList.toggle("show");
+
+          console.log(menu.className);
+
+          console.log(overlay.className);
+
+          document.body.style.overflow = menu.classList.contains("mobile-open")
+            ? "hidden"
+            : "";
+        };
       };
 
       overlay.onclick = function () {
