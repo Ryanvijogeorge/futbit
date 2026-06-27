@@ -494,7 +494,7 @@ button {
 
   background: rgba(0, 0, 0, 0.45);
 
-  backdrop-filter: blur(4px);
+  /*backdrop-filter: blur(4px);*/
 
   opacity: 0;
 
