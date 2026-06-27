@@ -427,7 +427,7 @@ button {
   top: 0;
 
   /* Ensure navbar stays above cards */
-  z-index: 100;
+  z-index: 250;
 
   /* Slight transparency */
   background: #07121fdd;
@@ -446,6 +446,10 @@ button {
   gap: 25px;
 
   align-items: center;
+
+  z-index: 260;
+
+  background: #07121f;
 }
 
 .nav-link {
@@ -502,7 +506,7 @@ button {
 
   transition: 0.25s;
 
-  z-index: 180;
+  z-index: 150;
 
   pointer-events: none;
 }
@@ -512,7 +516,7 @@ button {
 
   visibility: visible;
 
-  pointer-events: none;
+  pointer-events: auto;
 }
 
 /* ---------- HERO ---------- */
