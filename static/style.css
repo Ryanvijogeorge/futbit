@@ -49,63 +49,6 @@ main {
   gap: 25px;
 }
 
-/* ---------- PHONE ---------- */
-
-@media (max-width: 700px) {
-  .matches-container {
-    grid-template-columns: 1fr;
-  }
-
-  /* ---------- PHONE NAVBAR ---------- */
-  /* Hide desktop links */
-
-  .nav-right {
-    display: none;
-  }
-
-  /* Show hamburger icon */
-
-  .hamburger {
-    display: block;
-  }
-
-  /* ---------- SLIDE-IN MENU ---------- */
-
-  .nav-right.mobile-open {
-    display: flex;
-
-    flex-direction: column;
-
-    gap: 25px;
-
-    position: fixed;
-
-    top: 0;
-
-    right: 0;
-
-    width: 220px;
-
-    height: 100vh;
-
-    padding-top: 90px;
-
-    background: #07121fee;
-
-    backdrop-filter: blur(10px);
-
-    box-shadow: -5px 0 25px rgba(0, 0, 0, 0.35);
-
-    z-index: 200;
-  }
-
-  /* Slightly smaller navbar padding */
-
-  .nav-bar {
-    padding: 18px 18px;
-  }
-}
-
 /* ---------- MATCH CARD ---------- */
 
 .match-card {
@@ -492,6 +435,8 @@ button {
 }
 
 /* Container holding leaderboard login logout */
+/* ---------- DESKTOP NAV LINKS ---------- */
+/* Horizontal navbar links on desktop */
 .nav-right {
   display: flex;
 
@@ -780,4 +725,68 @@ button {
   font-weight: bold;
 
   cursor: pointer;
+}
+
+/* ===================================================== */
+/* ================= MOBILE NAVBAR ===================== */
+/* ===================================================== */
+
+@media (max-width: 700px) {
+  /* ---------- show hamburger ---------- */
+
+  .hamburger {
+    display: block;
+  }
+
+  /* ---------- smaller navbar padding ---------- */
+
+  .nav-bar {
+    padding: 18px 18px;
+  }
+
+  /* ---------- hidden menu by default ---------- */
+
+  .nav-right {
+    position: fixed;
+
+    top: 0;
+
+    right: -240px;
+
+    width: 220px;
+
+    height: 100vh;
+
+    padding-top: 90px;
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 25px;
+
+    align-items: center;
+
+    background: #07121fee;
+
+    backdrop-filter: blur(10px);
+
+    box-shadow: -5px 0 25px rgba(0, 0, 0, 0.35);
+
+    transition: right 0.3s ease;
+
+    z-index: 200;
+  }
+
+  /* ---------- opened menu ---------- */
+
+  .nav-right.mobile-open {
+    right: 0;
+  }
+
+  /* ---------- phone match layout ---------- */
+
+  .matches-container {
+    grid-template-columns: 1fr;
+  }
 }
