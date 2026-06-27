@@ -6,10 +6,7 @@
 
   <p>Predict World Cup matches and climb the leaderboard</p>
 
-  {% if not session.get("user_id") %}
-
- 
-  {% endif %} ```
+  {% if not session.get("user_id") %} {% endif %} ```
 </div>
 
 <h2 class="section-title">``` Upcoming Matches ```</h2>
@@ -63,7 +60,8 @@ match_id=match['id']
         min="0"
         max="20"
         required
-        value="{{ ((predictions or {}).get(match['id']) or {}).get('pred1','') }}"/>
+        value="{{ ((predictions or {}).get(match['id']) or {}).get('pred1','') }}"
+      />
 
       *
 
@@ -73,7 +71,8 @@ match_id=match['id']
         min="0"
         max="20"
         required
-        value="{{ ((predictions or {}).get(match['id']) or {}).get('pred2','') }}"/>
+        value="{{ ((predictions or {}).get(match['id']) or {}).get('pred2','') }}"
+      />
       <button class="predict-btn">Save</button>
     </form>
 
@@ -100,30 +99,70 @@ match_id=match['id']
     {% endif %}
   </div>
 
-  {% endfor %}
-</div>
+  {% if prediction_visibility.get(match["id"]) %}
 
-<div class="modal" id="prediction-modal">
-  <div class="modal-content">
-    <span id="close-modal"> × </span>
+  <div class="modal" id="modal-{{match['id']}}">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h2>Predictions</h2>
 
-    <div id="modal-body"></div>
+        <button class="close-modal" data-modal="{{match['id']}}">✕</button>
+      </div>
+
+      {% for p in prediction_visibility.get(match["id"],[]) %}
+
+      <div class="prediction-line">
+        <span> {{p["username"]}} </span>
+
+        {% if prediction_closed(match["id"]) %}
+
+        <span>
+          {{p["pred1"]}}-{{p["pred2"]}} {% if match["processed"] %}
+          (+{{p["points_awarded"]}}) {% endif %}
+        </span>
+
+        {% else %}
+
+        <span> ✓ </span>
+
+        {% endif %}
+      </div>
+
+      {% endfor %}
+    </div>
   </div>
+
+  {% endif %} {% endfor %}
 </div>
 
 <script>
-  document
-    .querySelectorAll(".show-more")
+  document.querySelectorAll(".show-more").forEach((btn)=>{
 
-    .forEach((btn) => {
-      btn.onclick = () => {
-        document.getElementById("prediction-modal").style.display = "flex";
-      };
-    });
+btn.onclick=()=>{
 
-  document.getElementById("close-modal").onclick = () => {
-    document.getElementById("prediction-modal").style.display = "none";
-  };
+let id=btn.dataset.modal;
+
+document.getElementById("modal-"+id).style.display="block";
+
+document.body.style.overflow="hidden";
+
+};
+
+});
+
+document.querySelectorAll(".close-modal").forEach((btn)=>{
+
+btn.onclick=()=>{
+
+let id=btn.dataset.modal;
+
+document.getElementById("modal-"+id).style.display="none";
+
+document.body.style.overflow="auto";
+
+};
+
+});
 </script>
 
 {% endblock %}
