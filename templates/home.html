@@ -136,19 +136,54 @@ match_id=match['id']
 </div>
 
 <script>
-btn.onclick=()=>{
 
-let id=btn.dataset.modal;
+window.onload = function () {
 
-console.log(id);
+    document.querySelectorAll(".show-more").forEach((btn) => {
 
-let modal=document.getElementById("modal-"+id);
+        btn.onclick = function () {
 
-console.log(modal);
+            let id = this.dataset.modal;
 
-modal.style.display="block";
+            console.log("clicked", id);
+
+            let modal = document.getElementById("modal-" + id);
+
+            console.log(modal);
+
+            if (modal) {
+
+                modal.style.display = "block";
+
+                document.body.style.overflow = "hidden";
+
+            }
+
+        };
+
+    });
+
+    document.querySelectorAll(".close-modal").forEach((btn) => {
+
+        btn.onclick = function () {
+
+            let id = this.dataset.modal;
+
+            let modal = document.getElementById("modal-" + id);
+
+            if (modal) {
+
+                modal.style.display = "none";
+
+                document.body.style.overflow = "auto";
+
+            }
+
+        };
+
+    });
 
 };
-</script>
 
+</script>
 {% endblock %}
