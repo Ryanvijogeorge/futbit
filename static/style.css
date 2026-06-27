@@ -512,7 +512,7 @@ button {
 
   visibility: visible;
 
-  pointer-events: auto;
+  pointer-events: none;
 }
 
 /* ---------- HERO ---------- */
