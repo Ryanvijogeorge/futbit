@@ -55,6 +55,55 @@ main {
   .matches-container {
     grid-template-columns: 1fr;
   }
+
+  /* ---------- PHONE NAVBAR ---------- */
+  /* Hide desktop links */
+
+  .nav-right {
+    display: none;
+  }
+
+  /* Show hamburger icon */
+
+  .hamburger {
+    display: block;
+  }
+
+  /* ---------- SLIDE-IN MENU ---------- */
+
+  .nav-right.mobile-open {
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 25px;
+
+    position: fixed;
+
+    top: 0;
+
+    right: 0;
+
+    width: 220px;
+
+    height: 100vh;
+
+    padding-top: 90px;
+
+    background: #07121fee;
+
+    backdrop-filter: blur(10px);
+
+    box-shadow: -5px 0 25px rgba(0, 0, 0, 0.35);
+
+    z-index: 200;
+  }
+
+  /* Slightly smaller navbar padding */
+
+  .nav-bar {
+    padding: 18px 18px;
+  }
 }
 
 /* ---------- MATCH CARD ---------- */
@@ -467,6 +516,52 @@ button {
   text-shadow: 0 0 8px rgba(243, 199, 77, 0.5);
 
   transform: scale(1.05);
+}
+
+/* ---------- MOBILE HAMBURGER BUTTON ---------- */
+/* Hidden on desktop, shown only on phones */
+
+.hamburger {
+  display: none;
+
+  background: none;
+
+  border: none;
+
+  color: white;
+
+  font-size: 30px;
+
+  cursor: pointer;
+
+  padding: 0;
+}
+
+/* ---------- MOBILE MENU BACKDROP ---------- */
+/* Darkens and blurs background when menu opens */
+
+.mobile-overlay {
+  position: fixed;
+
+  inset: 0;
+
+  background: rgba(0, 0, 0, 0.45);
+
+  backdrop-filter: blur(4px);
+
+  opacity: 0;
+
+  visibility: hidden;
+
+  transition: 0.25s ease;
+
+  z-index: 190;
+}
+
+.mobile-overlay.show {
+  opacity: 1;
+
+  visibility: visible;
 }
 
 /* ---------- HERO ---------- */
