@@ -19,7 +19,11 @@
     <div class="teams">
       <div class="team">
         <!-- FLAG HERE -->
-        {{match.team1_flag}}
+        <img
+          class="flag"
+          src="https://flagcdn.com/40x30/{{ match.team1_flag }}.png"
+          alt="{{ match.team1 }}"
+        />
 
         <div class="flag-placeholder"></div>
 
@@ -30,7 +34,11 @@
 
       <div class="team">
         <!-- FLAG HERE -->
-        {{match.team2_flag}}
+        <img
+          class="flag"
+          src="https://flagcdn.com/40x30/{{ match.team_flag }}.png"
+          alt="{{ match.team2 }}"
+        />
 
         <div class="flag-placeholder"></div>
 
@@ -138,54 +146,38 @@ match_id=match['id']
 </div>
 
 <script>
-
-window.onload = function () {
-
+  window.onload = function () {
     document.querySelectorAll(".show-more").forEach((btn) => {
+      btn.onclick = function () {
+        let id = this.dataset.modal;
 
-        btn.onclick = function () {
+        console.log("clicked", id);
 
-            let id = this.dataset.modal;
+        let modal = document.getElementById("modal-" + id);
 
-            console.log("clicked", id);
+        console.log(modal);
 
-            let modal = document.getElementById("modal-" + id);
+        if (modal) {
+          modal.style.display = "block";
 
-            console.log(modal);
-
-            if (modal) {
-
-                modal.style.display = "block";
-
-                document.body.style.overflow = "hidden";
-
-            }
-
-        };
-
+          document.body.style.overflow = "hidden";
+        }
+      };
     });
 
     document.querySelectorAll(".close-modal").forEach((btn) => {
+      btn.onclick = function () {
+        let id = this.dataset.modal;
 
-        btn.onclick = function () {
+        let modal = document.getElementById("modal-" + id);
 
-            let id = this.dataset.modal;
+        if (modal) {
+          modal.style.display = "none";
 
-            let modal = document.getElementById("modal-" + id);
-
-            if (modal) {
-
-                modal.style.display = "none";
-
-                document.body.style.overflow = "auto";
-
-            }
-
-        };
-
+          document.body.style.overflow = "auto";
+        }
+      };
     });
-
-};
-
+  };
 </script>
 {% endblock %}
