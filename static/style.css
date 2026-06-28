@@ -749,6 +749,23 @@ button {
   cursor: pointer;
 }
 
+/* ---------- World Cup logo above hero ---------- */
+
+.wc-logo {
+  display: block;
+
+  width: 120px;
+  max-width: 45vw;
+
+  height: auto;
+
+  margin: 0 auto 18px;
+
+  user-select: none;
+
+  pointer-events: none;
+}
+
 /* ===================================================== */
 /* ================= MOBILE NAVBAR ===================== */
 /* ===================================================== */
@@ -842,6 +859,11 @@ button {
   .prediction-line {
     font-size: 0.9rem;
   }
+
+  .wc-logo{
+    width:90px;
+    margin-bottom:14px;
+}
 }
 
 /* ---------- COUNTRY FLAGS ---------- */

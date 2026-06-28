@@ -1,6 +1,11 @@
 {% extends "base.html" %} {% block content %}
 
 <div class="hero">
+  <img
+    src="{{ url_for('static', filename='static/wclogo.jpg') }}"
+    class="wc-logo"
+    alt="FIFA World Cup 2026"
+  />
   <h1>FUTBIT</h1>
 
   <p>Predict World Cup matches and climb the leaderboard</p>
