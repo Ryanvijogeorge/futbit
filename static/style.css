@@ -831,3 +831,21 @@ button {
     font-size: 0.9rem;
   }
 }
+
+/* ---------- COUNTRY FLAGS ---------- */
+
+.flag{
+
+width:28px;
+
+height:21px;
+
+object-fit:cover;
+
+border-radius:3px;
+
+vertical-align:middle;
+
+margin-right:8px;
+
+}
