@@ -25,7 +25,6 @@
           alt="{{ match.team1 }}"
         />
 
-
         <span> {{match["team1"]}} </span>
       </div>
 
@@ -43,8 +42,12 @@
     </div>
 
     <div class="kickoff">{{match["kickoff_display"]}}</div>
-    ``` {% if session.get("user_id") %} ``` {% if prediction_closed(match["id"])
-    %}
+    {% if match["processed"] %}
+
+    <div class="final-score">{{match["score1"]}} - {{match["score2"]}}</div>
+
+    {% else %} ``` {% if session.get("user_id") %} ``` {% if
+    prediction_closed(match["id"]) %}
 
     <div class="closed">Predictions Closed</div>
 
@@ -96,7 +99,7 @@ match_id=match['id']
       </a>
     </div>
 
-    {% endif %} {% if prediction_visibility.get(match["id"]) %}
+    {% endif %} {% endif %} {% if prediction_visibility.get(match["id"]) %}
 
     <button class="show-more" data-modal="{{match['id']}}">
       Show Predictions
