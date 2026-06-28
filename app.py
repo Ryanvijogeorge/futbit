@@ -40,7 +40,7 @@ def admin_required():
 @app.route("/")
 def home():
 
-    matches = get_all_matches()
+    matches = [dict(match) for match in get_all_matches()]
 
     for match in matches:
 
