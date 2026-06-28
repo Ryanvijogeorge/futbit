@@ -17,6 +17,10 @@ body {
   overflow-x: hidden;
 }
 
+.hero-title {
+  font-family: "Bangers"
+}
+
 nav {
   padding: 20px 40px;
 
