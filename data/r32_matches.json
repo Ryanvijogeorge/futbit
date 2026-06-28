@@ -1,0 +1,33 @@
+[
+  {"id":73,"team1":"South Africa","team2":"Canada","group_name":null,"stage":"Round of 32","match_number":73,"kickoff":"2026-06-28T15:00:00-04:00","score1":null,"score2":null,"status":"upcoming","processed":0},
+
+  {"id":74,"team1":"Brazil","team2":"Japan","group_name":null,"stage":"Round of 32","match_number":74,"kickoff":"2026-06-29T22:30:00-04:00","score1":null,"score2":null,"status":"upcoming","processed":0},
+
+  {"id":75,"team1":"Netherlands","team2":"Morocco","group_name":null,"stage":"Round of 32","match_number":75,"kickoff":"2026-06-30T06:30:00-04:00","score1":null,"score2":null,"status":"upcoming","processed":0},
+
+  {"id":76,"team1":"Germany","team2":"Paraguay","group_name":null,"stage":"Round of 32","match_number":76,"kickoff":"2026-06-30T14:00:00-04:00","score1":null,"score2":null,"status":"upcoming","processed":0},
+
+  {"id":77,"team1":"France","team2":"Sweden","group_name":null,"stage":"Round of 32","match_number":77,"kickoff":"2026-07-01T02:30:00-04:00","score1":null,"score2":null,"status":"upcoming","processed":0},
+
+  {"id":78,"team1":"Ivory Coast","team2":"Norway","group_name":null,"stage":"Round of 32","match_number":78,"kickoff":"2026-06-30T22:30:00-04:00","score1":null,"score2":null,"status":"upcoming","processed":0},
+
+  {"id":79,"team1":"Belgium","team2":"Senegal","group_name":null,"stage":"Round of 32","match_number":79,"kickoff":"2026-07-02T01:30:00-04:00","score1":null,"score2":null,"status":"upcoming","processed":0},
+
+  {"id":80,"team1":"United States","team2":"Bosnia and Herzegovina","group_name":null,"stage":"Round of 32","match_number":80,"kickoff":"2026-07-02T05:30:00-04:00","score1":null,"score2":null,"status":"upcoming","processed":0},
+
+  {"id":81,"team1":"Mexico","team2":"Ecuador","group_name":null,"stage":"Round of 32","match_number":81,"kickoff":"2026-07-01T18:30:00-04:00","score1":null,"score2":null,"status":"upcoming","processed":0},
+
+  {"id":82,"team1":"England","team2":"DR Congo","group_name":null,"stage":"Round of 32","match_number":82,"kickoff":"2026-07-01T21:30:00-04:00","score1":null,"score2":null,"status":"upcoming","processed":0},
+
+  {"id":83,"team1":"Spain","team2":"Austria","group_name":null,"stage":"Round of 32","match_number":83,"kickoff":"2026-07-03T00:30:00-04:00","score1":null,"score2":null,"status":"upcoming","processed":0},
+
+  {"id":84,"team1":"Portugal","team2":"Croatia","group_name":null,"stage":"Round of 32","match_number":84,"kickoff":"2026-07-03T04:30:00-04:00","score1":null,"score2":null,"status":"upcoming","processed":0},
+
+  {"id":85,"team1":"Switzerland","team2":"Algeria","group_name":null,"stage":"Round of 32","match_number":85,"kickoff":"2026-07-03T08:30:00-04:00","score1":null,"score2":null,"status":"upcoming","processed":0},
+
+  {"id":86,"team1":"Colombia","team2":"Ghana","group_name":null,"stage":"Round of 32","match_number":86,"kickoff":"2026-07-04T07:00:00-04:00","score1":null,"score2":null,"status":"upcoming","processed":0},
+
+  {"id":87,"team1":"Australia","team2":"Egypt","group_name":null,"stage":"Round of 32","match_number":87,"kickoff":"2026-07-03T23:30:00-04:00","score1":null,"score2":null,"status":"upcoming","processed":0},
+
+  {"id":88,"team1":"Argentina","team2":"Cabo Verde","group_name":null,"stage":"Round of 32","match_number":88,"kickoff":"2026-07-04T03:30:00-04:00","score1":null,"score2":null,"status":"upcoming","processed":0}
+]

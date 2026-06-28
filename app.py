@@ -20,6 +20,8 @@ from helpers import (
     update_standing,
     get_leaderboard,
     get_predictions,
+    get_matches_by_stage,
+    get_active_stage,
     FLAGS
 )
 
@@ -40,7 +42,7 @@ def admin_required():
 @app.route("/")
 def home():
 
-    matches = [dict(match) for match in get_all_matches()]
+    matches = [dict(match) for match in get_matches_by_stage(get_active_stage())]
 
     for match in matches:
 

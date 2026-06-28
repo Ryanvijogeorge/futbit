@@ -23,6 +23,10 @@ def get_connection():
     return g.db, g.cur
 
 
+def get_active_stage():
+    return "Round of 32"
+
+
 def get_groups():
     conn, cur = get_connection()
 
@@ -307,6 +311,40 @@ def get_all_matches():
         kickoff ASC
 
         """)
+
+    matches = cur.fetchall()
+
+    return matches
+
+
+def get_matches_by_stage(stage):
+
+    conn, cur = get_connection()
+
+    cur.execute(
+        """
+
+        SELECT *
+
+        FROM matches
+
+        WHERE stage = %s
+
+        ORDER BY
+
+        CASE status
+
+            WHEN 'upcoming' THEN 0
+
+            WHEN 'Completed' THEN 1
+
+        END,
+
+        kickoff ASC
+
+        """,
+        (stage,),
+    )
 
     matches = cur.fetchall()
 

@@ -9,7 +9,7 @@ DATA_DIR = BASE_DIR / "data"
 DB_PATH = DATA_DIR / "worldcup.db"
 MATCHES_PATH = DATA_DIR / "matches.json"
 
-DATABASE_URL = "postgresql://neondb_owner:npg_Ca5Me1dwFSXN@ep-summer-lake-ao8jq9hi-pooler.c-2.ap-southeast-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require"
+DATABASE_URL = "postgresql://neondb_owner:npg_pEGv3DORh1Kn@ep-mute-breeze-aoykew70-pooler.c-2.ap-southeast-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require"
 
 
 def get_connection():
