@@ -20,6 +20,7 @@ from helpers import (
     update_standing,
     get_leaderboard,
     get_predictions,
+    FLAGS
 )
 
 app = Flask(__name__)
@@ -40,6 +41,12 @@ def admin_required():
 def home():
 
     matches = get_all_matches()
+
+    for match in matches:
+
+        match["team1_flag"] = FLAGS.get(match["team1"], "")
+
+        match["team2_flag"] = FLAGS.get(match["team2"], "")
 
     predictions = {}
 

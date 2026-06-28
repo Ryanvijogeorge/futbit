@@ -9,7 +9,7 @@ from flask import g
 BASE_DIR = Path(__file__).resolve().parent
 DB_PATH = BASE_DIR / "data" / "worldcup.db"
 
-#os.environ["DATABASE_URL"]
+# os.environ["DATABASE_URL"]
 DATABASE_URL = os.environ["DATABASE_URL"]
 
 
@@ -19,7 +19,7 @@ def get_connection():
         print("NEW CONNECTION")
         g.db = psycopg2.connect(DATABASE_URL)
         g.cur = g.db.cursor(cursor_factory=DictCursor)
-        print("connect took", perf_counter()-t)
+        print("connect took", perf_counter() - t)
     return g.db, g.cur
 
 
@@ -65,7 +65,7 @@ def get_groups():
 
         result[group["group_name"]] = [t["team"] for t in teams]
 
-    #conn.close()
+    # conn.close()
 
     return result
 
@@ -86,7 +86,7 @@ def get_matches_by_group(group_name):
 
     matches = cur.fetchall()
 
-    #conn.close()
+    # conn.close()
 
     return matches
 
@@ -108,7 +108,7 @@ def get_standings(group_name):
 
     standings = cur.fetchall()
 
-    #conn.close()
+    # conn.close()
 
     return standings
 
@@ -131,7 +131,7 @@ def get_match(match_id):
 
     match = cur.fetchone()
 
-    #conn.close()
+    # conn.close()
 
     return match
 
@@ -166,7 +166,7 @@ def get_prediction(user_id, match_id):
 
     prediction = cur.fetchone()
 
-    #conn.close()
+    # conn.close()
 
     return prediction
 
@@ -220,7 +220,7 @@ def save_prediction(user_id, match_id, pred1, pred2):
     )
 
     conn.commit()
-    #conn.close()
+    # conn.close()
 
 
 def get_match_predictions(match_id):
@@ -260,7 +260,7 @@ def get_match_predictions(match_id):
 
     predictions = cur.fetchall()
 
-    #conn.close()
+    # conn.close()
 
     return predictions
 
@@ -268,7 +268,8 @@ def get_match_predictions(match_id):
 def get_predictions(match_ids):
     conn, cur = get_connection()
 
-    cur.execute("""
+    cur.execute(
+        """
         SELECT
             p.*,
             u.username
@@ -276,7 +277,9 @@ def get_predictions(match_ids):
         JOIN users u
             ON p.user_id = u.id
         WHERE p.match_id = ANY(%s)
-    """, (match_ids,))
+    """,
+        (match_ids,),
+    )
 
     return cur.fetchall()
 
@@ -308,7 +311,6 @@ def get_all_matches():
     matches = cur.fetchall()
 
     return matches
-    
 
 
 def calculate_points(pred1, pred2, score1, score2):
@@ -419,7 +421,7 @@ def recompute_match_points(match_id):
 
     conn.commit()
 
-    #conn.close()
+    # conn.close()
 
 
 def process_match(match_id, score1, score2):
@@ -453,7 +455,7 @@ def process_match(match_id, score1, score2):
 
     conn.commit()
 
-    #conn.close()
+    # conn.close()
 
     recompute_match_points(match_id)
 
@@ -491,7 +493,7 @@ def update_standing(group_name, team, position, points):
 
     conn.commit()
 
-    #conn.close()
+    # conn.close()
 
 
 def get_leaderboard():
@@ -518,6 +520,58 @@ def get_leaderboard():
 
     leaderboard = cur.fetchall()
 
-    #conn.close()
+    # conn.close()
 
     return leaderboard
+
+
+FLAGS = {
+    "Algeria": "dz",
+    "Argentina": "ar",
+    "Australia": "au",
+    "Austria": "at",
+    "Belgium": "be",
+    "Bosnia and Herzegovina": "ba",
+    "Brazil": "br",
+    "Canada": "ca",
+    "Cape Verde": "cv",
+    "Colombia": "co",
+    "Croatia": "hr",
+    "Curacao": "cw",
+    "Czechia": "cz",
+    "DR Congo": "cd",
+    "Ecuador": "ec",
+    "Egypt": "eg",
+    "England": "gb-eng",
+    "France": "fr",
+    "Germany": "de",
+    "Ghana": "gh",
+    "Haiti": "ht",
+    "Iran": "ir",
+    "Iraq": "iq",
+    "Ivory Coast": "ci",
+    "Japan": "jp",
+    "Jordan": "jo",
+    "Mexico": "mx",
+    "Morocco": "ma",
+    "Netherlands": "nl",
+    "New Zealand": "nz",
+    "Norway": "no",
+    "Panama": "pa",
+    "Paraguay": "py",
+    "Portugal": "pt",
+    "Qatar": "qa",
+    "Saudi Arabia": "sa",
+    "Scotland": "gb-sct",
+    "Senegal": "sn",
+    "South Africa": "za",
+    "South Korea": "kr",
+    "Spain": "es",
+    "Sweden": "se",
+    "Switzerland": "ch",
+    "Tunisia": "tn",
+    "Turkey": "tr",
+    "United States": "us",
+    "Uruguay": "uy",
+    "Uzbekistan": "uz",
+}
