@@ -6,10 +6,10 @@
 
   <p>Predict World Cup matches and climb the leaderboard</p>
 
-  {% if not session.get("user_id") %} {% endif %} ```
+  {% if not session.get("user_id") %} {% endif %} 
 </div>
 
-<h2 class="section-title">``` Round of 32 ```</h2>
+<h2 class="section-title">Round of 32</h2>
 
 <div class="matches-container">
   {% for match in matches %}
@@ -46,12 +46,12 @@
 
     <div class="final-score">{{match["score1"]}} - {{match["score2"]}}</div>
 
-    {% else %} ``` {% if session.get("user_id") %} ``` {% if
+    {% else %}  {% if session.get("user_id") %}  {% if
     prediction_closed(match["id"]) %}
 
     <div class="closed">Predictions Closed</div>
 
-    {% else %} ```
+    {% else %} 
 
     <form
       method="POST"
@@ -72,7 +72,7 @@ match_id=match['id']
         value="{{ ((predictions or {}).get(match['id']) or {}).get('pred1','') }}"
       />
 
-      *
+      
 
       <input
         type="number"
@@ -85,12 +85,12 @@ match_id=match['id']
       <button class="predict-btn">Save</button>
     </form>
 
-    ``` {% endif %} ``` {% else %}
+     {% endif %}  {% else %}
 
     <div class="guest-lock">
       <input type="number" placeholder="0" disabled />
 
-      *
+      
 
       <input type="number" placeholder="0" disabled />
 
