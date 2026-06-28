@@ -18,7 +18,17 @@ body {
 }
 
 .hero-title {
-  font-family: "Bangers"
+  font-family: "Bangers", system-ui, sans-serif;
+
+  font-size: clamp(3rem, 8vw, 5.5rem);
+
+  letter-spacing: 3px;
+
+  font-weight: normal;
+
+  margin-bottom: 0.4rem;
+
+  line-height: 1;
 }
 
 nav {
@@ -864,10 +874,10 @@ button {
     font-size: 0.9rem;
   }
 
-  .wc-logo{
-    width:90px;
-    margin-bottom:14px;
-}
+  .wc-logo {
+    width: 90px;
+    margin-bottom: 14px;
+  }
 }
 
 /* ---------- COUNTRY FLAGS ---------- */
