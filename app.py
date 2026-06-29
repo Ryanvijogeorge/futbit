@@ -185,7 +185,7 @@ def predict(match_id):
 def login():
 
     if request.method == "POST":
-        username = request.form["username"]
+        username = request.form["username"].strip()
 
         password = request.form["password"]
 
@@ -223,7 +223,7 @@ def login():
 def register():
 
     if request.method == "POST":
-        username = request.form["username"]
+        username = request.form["username"].strip()
 
         password = request.form["password"]
 
