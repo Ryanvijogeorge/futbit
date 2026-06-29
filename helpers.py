@@ -185,6 +185,13 @@ def prediction_closed(match_id):
 
     now = datetime.now(kickoff.tzinfo)
 
+    print("=" * 40)
+    print(f"Match ID : {match_id}")
+    print(f"Kickoff  : {kickoff}")
+    print(f"Lock     : {lock_time}")
+    print(f"Now      : {now}")
+    print(f"Closed?  : {now >= lock_time}")
+
     return now >= lock_time
 
 
@@ -613,3 +620,4 @@ FLAGS = {
     "Uruguay": "uy",
     "Uzbekistan": "uz",
 }
+
