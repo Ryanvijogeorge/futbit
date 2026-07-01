@@ -362,7 +362,7 @@ def calculate_points(pred1, pred2, score1, score2):
 
     if pred1 == score1 and pred2 == score2:
 
-        return 10
+        return 20
 
     # bools as ints for outcome
     pred_outcome = (pred1 > pred2) - (pred1 < pred2)
@@ -375,11 +375,15 @@ def calculate_points(pred1, pred2, score1, score2):
 
         actual_gd = score1 - score2
 
+        if (pred1 == score1) or (pred2 == score2):
+            return 12
+
         if pred_gd == actual_gd:
 
-            return 5
+            return 10
+        
 
-        return 3
+        return 5
 
     return 0
 
