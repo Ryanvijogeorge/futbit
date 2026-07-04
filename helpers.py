@@ -10,7 +10,11 @@ BASE_DIR = Path(__file__).resolve().parent
 DB_PATH = BASE_DIR / "data" / "worldcup.db"
 
 # os.environ["DATABASE_URL"]
+test_url = "postgresql://neondb_owner:npg_Ca5Me1dwFSXN@ep-summer-lake-ao8jq9hi-pooler.c-2.ap-southeast-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require"
+real_url = "postgresql://neondb_owner:npg_pEGv3DORh1Kn@ep-mute-breeze-aoykew70-pooler.c-2.ap-southeast-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require"
 DATABASE_URL = os.environ["DATABASE_URL"]
+#DATABASE_URL = test_url
+
 
 
 def get_connection():
@@ -24,7 +28,7 @@ def get_connection():
 
 
 def get_active_stage():
-    return "Round of 32"
+    return "Round of 16"
 
 
 def get_groups():

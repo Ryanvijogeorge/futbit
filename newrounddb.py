@@ -5,16 +5,16 @@ from init_db import get_connection, insert_matches
 
 BASE_DIR = Path(__file__).resolve().parent
 DATA_DIR = BASE_DIR / "data"
-R32_PATH = DATA_DIR / "r32_matches.json"
+R32_PATH = DATA_DIR / "r16_matches.json"
 
 
-def load_r32_matches():
+def load_r16_matches():
     with R32_PATH.open("r", encoding="utf-8") as f:
         return json.load(f)
 
 
-def add_round_of_32():
-    matches = load_r32_matches()
+def add_round_of_16():
+    matches = load_r16_matches()
 
     with get_connection() as conn:
         cur = conn.cursor()
@@ -23,8 +23,8 @@ def add_round_of_32():
 
         conn.commit()
 
-    print(f"✅ Added {len(matches)} Round of 32 matches.")
+    print(f"✅ Added {len(matches)} Round of 16 matches.")
 
 
 if __name__ == "__main__":
-    add_round_of_32()
+    add_round_of_16()

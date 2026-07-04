@@ -31,6 +31,8 @@ app.jinja_env.globals.update(prediction_closed=prediction_closed)
 app.secret_key = os.environ.get("SECRET_KEY", "dev-secret-key")
 
 #os.environ["DATABASE_URL"]
+test_url = "postgresql://neondb_owner:npg_Ca5Me1dwFSXN@ep-summer-lake-ao8jq9hi-pooler.c-2.ap-southeast-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require"
+real_url = "postgresql://neondb_owner:npg_pEGv3DORh1Kn@ep-mute-breeze-aoykew70-pooler.c-2.ap-southeast-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require"
 DATABASE_URL = os.environ["DATABASE_URL"]
 
 
