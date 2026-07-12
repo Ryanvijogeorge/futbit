@@ -28,7 +28,7 @@ def get_connection():
 
 
 def get_active_stage():
-    return "Round of 16"
+    return "Quarter-finals"
 
 
 def get_groups():
