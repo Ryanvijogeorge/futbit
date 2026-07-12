@@ -5,7 +5,7 @@ from init_db import get_connection, insert_matches
 
 BASE_DIR = Path(__file__).resolve().parent
 DATA_DIR = BASE_DIR / "data"
-R32_PATH = DATA_DIR / "r16_matches.json"
+R32_PATH = DATA_DIR / "semi_finals.json"
 
 
 def load_r16_matches():
@@ -23,7 +23,7 @@ def add_round_of_16():
 
         conn.commit()
 
-    print(f"✅ Added {len(matches)} Round of 16 matches.")
+    print(f"✅ Added {len(matches)} semi final matches.")
 
 
 if __name__ == "__main__":

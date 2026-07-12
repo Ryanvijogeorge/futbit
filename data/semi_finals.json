@@ -1,0 +1,28 @@
+[
+  {
+    "id": 99,
+    "match_number": 99,
+    "stage": "Semi-finals",
+    "group_name": null,
+    "team1": "France",
+    "team2": "Spain",
+    "kickoff": "2026-07-14T19:00:00-05:00",
+    "score1": null,
+    "score2": null,
+    "status": "upcoming",
+    "processed": 0
+  },
+  {
+    "id": 100,
+    "match_number": 100,
+    "stage": "Semi-finals",
+    "group_name": null,
+    "team1": "England",
+    "team2": "Argentina",
+    "kickoff": "2026-07-15T19:00:00-04:00",
+    "score1": null,
+    "score2": null,
+    "status": "upcoming",
+    "processed": 0
+  }
+]
