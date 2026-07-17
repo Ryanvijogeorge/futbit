@@ -28,7 +28,7 @@ def get_connection():
 
 
 def get_active_stage():
-    return "Semi-finals"
+    return "Final"
 
 
 def get_groups():

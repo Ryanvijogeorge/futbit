@@ -1,0 +1,28 @@
+[
+  {
+    "id": 103,
+    "match_number": 103,
+    "stage": "Final",
+    "group_name": null,
+    "team1": "France",
+    "team2": "England",
+    "kickoff": "2026-07-18T17:00:00-04:00",
+    "score1": null,
+    "score2": null,
+    "status": "upcoming",
+    "processed": 0
+  },
+  {
+    "id": 104,
+    "match_number": 104,
+    "stage": "Final",
+    "group_name": null,
+    "team1": "Spain",
+    "team2": "Argentina",
+    "kickoff": "2026-07-19T15:00:00-04:00",
+    "score1": null,
+    "score2": null,
+    "status": "upcoming",
+    "processed": 0
+  }
+]
